@@ -25,22 +25,23 @@ public class ExceptionHandle {
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handleInternalServerError(final ServerException e)  {
+    public ResponseEntity<String> handleInternalServerError(final ServerException e) {
         log.info("500 {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handleValidationException(final ValidationException e)  {
+    public ResponseEntity<String> handleValidationException(final ValidationException e) {
         log.info("400 {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handleMethodArgumentNotValidException (final MethodArgumentNotValidException e)  {
+    public ResponseEntity<String> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.info("400 {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler
     public ResponseEntity<String> handleThrowable(final Throwable e) {
         log.info(e.getMessage());

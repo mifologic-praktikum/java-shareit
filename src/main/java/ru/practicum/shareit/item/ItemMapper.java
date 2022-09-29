@@ -29,7 +29,7 @@ public class ItemMapper {
 
     public static List<ItemDto> toListItemDto(List<Item> itemList) {
         List<ItemDto> itemDtos = new ArrayList<>();
-        for(Item item : itemList) {
+        for (Item item : itemList) {
             itemDtos.add(toItemDto(item));
         }
         return itemDtos;
