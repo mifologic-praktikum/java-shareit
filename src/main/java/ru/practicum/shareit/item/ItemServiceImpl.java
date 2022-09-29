@@ -23,36 +23,36 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public List<Item> findAllItems(Long userId) {
-        return itemStorage.findAllItems(userId);
+    public List<ItemDto> findAllItems(Long userId) {
+        return  ItemMapper.toListItemDto(itemStorage.findAllItems(userId));
     }
 
     @Override
-    public Item findItemById(Long itemId) {
-        return itemStorage.findItemById(itemId);
+    public ItemDto findItemById(Long itemId) {
+        return ItemMapper.toItemDto(itemStorage.findItemById(itemId));
     }
 
     @Override
-    public List<Item> searchItems(String text) {
-        return itemStorage.searchItems(text);
+    public List<ItemDto> searchItems(String text) {
+        return ItemMapper.toListItemDto(itemStorage.searchItems(text));
     }
 
     @Override
-    public Item createItem(ItemDto itemDto, Long userId) {
+    public ItemDto createItem(ItemDto itemDto, Long userId) {
         User owner = userStorage.findUserById(userId);
         Item item = ItemMapper.toItem(itemDto, owner);
-        return itemStorage.createItem(item);
+        return ItemMapper.toItemDto(itemStorage.createItem(item));
     }
 
     @Override
-    public Item updateItem(Long itemId, ItemDto itemDto, Long userId) {
-        Long ownerId = findItemById(itemId).getOwner().getId();
-        if (!Objects.equals(ownerId, userId)) {
+    public ItemDto updateItem(Long itemId, ItemDto itemDto, Long userId) {
+        Item itemById = itemStorage.findItemById(itemId);
+        if (!Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new NotFoundException("This user can't update this item");
         }
         User owner = userStorage.findUserById(userId);
         Item item = ItemMapper.toItem(itemDto, owner);
-        return itemStorage.updateItem(itemId, item);
+        return ItemMapper.toItemDto(itemStorage.updateItem(itemId, item));
     }
 
     @Override

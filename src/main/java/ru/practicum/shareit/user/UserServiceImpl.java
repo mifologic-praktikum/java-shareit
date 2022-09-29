@@ -15,24 +15,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return userStorage.findAllUsers();
+    public List<UserDto> findAllUsers() {
+        return UserMapper.toListUserDto(userStorage.findAllUsers());
     }
 
     @Override
-    public User findUserById(Long userId) {
-        return userStorage.findUserById(userId);
+    public UserDto findUserById(Long userId) {
+        return UserMapper.toUserDto(userStorage.findUserById(userId));
     }
 
     @Override
-    public User createUser(UserDto userDto) {
-        return userStorage.createUser(UserMapper.toUser(userDto));
+    public UserDto createUser(UserDto userDto) {
+        return UserMapper.toUserDto(userStorage.createUser(UserMapper.toUser(userDto)));
     }
 
     @Override
-    public User updateUser(Long userId, UserDto userDto) {
+    public UserDto updateUser(Long userId, UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        return userStorage.updateUser(userId, user);
+        return UserMapper.toUserDto(userStorage.updateUser(userId, user));
     }
 
     @Override

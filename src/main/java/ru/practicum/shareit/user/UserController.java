@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -9,10 +10,8 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
+@Slf4j
 @RequestMapping(path = "/users")
 public class UserController {
 
@@ -24,27 +23,32 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> findAllUsers() {
+    public List<UserDto> findAllUsers() {
+        log.info("Find all users");
         return userService.findAllUsers();
     }
 
     @GetMapping("/{userId}")
-    public User findUserById(@PathVariable Long userId) {
+    public UserDto findUserById(@PathVariable Long userId) {
+        log.info("Find user with id=" + userId);
         return userService.findUserById(userId);
     }
 
     @PostMapping
-    public User createUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
+    public UserDto createUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
+        log.info("Create user");
         return userService.createUser(userDto);
     }
 
     @PatchMapping("/{userId}")
-    public User updateUser(@Validated({Update.class}) @PathVariable Long userId, @RequestBody UserDto userDto) {
+    public UserDto updateUser(@Validated({Update.class}) @PathVariable Long userId, @RequestBody UserDto userDto) {
+        log.info("Update user with id=" + userId);
         return userService.updateUser(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
+        log.info("Delete user with id=" + userId);
         userService.deleteUser(userId);
     }
 }

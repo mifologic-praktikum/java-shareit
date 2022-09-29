@@ -1,6 +1,10 @@
 package ru.practicum.shareit.user;
 
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserMapper {
 
@@ -16,5 +20,13 @@ public class UserMapper {
                 user.getName(),
                 user.getEmail()
         );
+    }
+
+    public static List<UserDto> toListUserDto(List<User> usersList) {
+        List<UserDto> itemDtos = new ArrayList<>();
+        for (User user : usersList) {
+            itemDtos.add(toUserDto(user));
+        }
+        return itemDtos;
     }
 }

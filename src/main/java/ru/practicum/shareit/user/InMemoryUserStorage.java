@@ -11,18 +11,17 @@ public class InMemoryUserStorage {
 
     private static Long userId = 0L;
     private final Map<Long, User> users = new TreeMap<>();
+    private final Set<String> emails = new HashSet<>();
 
     private Long generateUserId() {
         return ++userId;
     }
 
     private void checkEmailUniq(User user) {
-        Set<String> emails = new HashSet<>();
-        for (User u : users.values()) {
-            emails.add(u.getEmail());
-        }
         if (emails.contains(user.getEmail())) {
             throw new ServerException("Email must be uniq");
+        } else {
+            emails.add(user.getEmail());
         }
     }
 
@@ -46,9 +45,10 @@ public class InMemoryUserStorage {
     }
 
     public User updateUser(Long userId, User user) {
-        checkEmailUniq(user);
         User userInMemory = findUserById(userId);
         if (user.getEmail() != null) {
+            emails.remove(userInMemory.getEmail());
+            checkEmailUniq(user);
             userInMemory.setEmail(user.getEmail());
         }
         if (user.getName() != null) {
@@ -59,6 +59,7 @@ public class InMemoryUserStorage {
     }
 
     public void deleteUser(Long userId) {
+        emails.remove(users.get(userId).getEmail());
         users.remove(userId);
     }
 }
