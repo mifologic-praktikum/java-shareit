@@ -1,8 +1,5 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;

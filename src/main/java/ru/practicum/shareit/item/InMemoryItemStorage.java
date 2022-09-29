@@ -14,10 +14,11 @@ public class InMemoryItemStorage {
     private Long generateItemId() {
         return ++itemId;
     }
+
     public List<Item> findAllItems(Long userId) {
         List<Item> userItems = new ArrayList<>();
-        for(Item item : items.values()) {
-            if(item.getOwner().getId() == userId) {
+        for (Item item : items.values()) {
+            if (item.getOwner().getId() == userId) {
                 userItems.add(item);
             }
         }
@@ -30,12 +31,12 @@ public class InMemoryItemStorage {
 
     public List<Item> searchItems(String text) {
         List<Item> foundItems = new ArrayList<>();
-        if(text.isBlank()) {
+        if (text.isBlank()) {
             return Collections.emptyList();
         }
-        for(Item item : items.values()) {
-            if(item.getName().toLowerCase().contains(text.toLowerCase()) & item.getAvailable() ||
-                    item.getDescription().toLowerCase().contains(text.toLowerCase())  & item.getAvailable()) {
+        for (Item item : items.values()) {
+            if (item.getName().toLowerCase().contains(text.toLowerCase()) & item.getAvailable() ||
+                    item.getDescription().toLowerCase().contains(text.toLowerCase()) & item.getAvailable()) {
                 foundItems.add(item);
             }
         }
@@ -50,13 +51,13 @@ public class InMemoryItemStorage {
 
     public Item updateItem(Long itemId, Item item) {
         Item itemInMemory = findItemById(itemId);
-        if(item.getName() != null) {
+        if (item.getName() != null) {
             itemInMemory.setName(item.getName());
         }
-        if(item.getDescription() != null) {
+        if (item.getDescription() != null) {
             itemInMemory.setDescription(item.getDescription());
         }
-        if(item.getAvailable() != null) {
+        if (item.getAvailable() != null) {
             itemInMemory.setAvailable(item.getAvailable());
         }
         return itemInMemory;
