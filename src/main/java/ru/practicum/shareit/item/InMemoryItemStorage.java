@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryItemStorage {
@@ -18,7 +19,7 @@ public class InMemoryItemStorage {
     public List<Item> findAllItems(Long userId) {
         List<Item> userItems = new ArrayList<>();
         for (Item item : items.values()) {
-            if (item.getOwner().getId() == userId) {
+            if (Objects.equals(item.getOwner().getId(), userId)) {
                 userItems.add(item);
             }
         }
@@ -30,17 +31,13 @@ public class InMemoryItemStorage {
     }
 
     public List<Item> searchItems(String text) {
-        List<Item> foundItems = new ArrayList<>();
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        for (Item item : items.values()) {
-            if (item.getName().toLowerCase().contains(text.toLowerCase()) & item.getAvailable() ||
-                    item.getDescription().toLowerCase().contains(text.toLowerCase()) & item.getAvailable()) {
-                foundItems.add(item);
-            }
-        }
-        return foundItems;
+        return items.values().stream()
+                .filter(item ->item.getName().toLowerCase().contains(text.toLowerCase()) || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .filter(Item::getAvailable)
+                .collect(Collectors.toList());
     }
 
     public Item createItem(Item item) {
