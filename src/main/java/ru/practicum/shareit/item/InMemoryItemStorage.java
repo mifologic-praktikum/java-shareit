@@ -35,7 +35,7 @@ public class InMemoryItemStorage {
             return Collections.emptyList();
         }
         return items.values().stream()
-                .filter(item ->item.getName().toLowerCase().contains(text.toLowerCase()) || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) || item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .filter(Item::getAvailable)
                 .collect(Collectors.toList());
     }
