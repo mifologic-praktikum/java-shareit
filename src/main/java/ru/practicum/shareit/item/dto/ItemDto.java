@@ -4,7 +4,6 @@ import lombok.*;
 import ru.practicum.shareit.Create;
 import ru.practicum.shareit.Update;
 import ru.practicum.shareit.booking.dto.ItemBookingDto;
-import ru.practicum.shareit.item.comments.Comment;
 import ru.practicum.shareit.item.comments.CommentDto;
 
 import javax.persistence.Transient;

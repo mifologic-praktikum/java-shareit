@@ -1,7 +1,5 @@
 package ru.practicum.shareit.item.comments;
 
-import ru.practicum.shareit.item.ItemMapper;
-
 import java.util.ArrayList;
 import java.util.List;
 
