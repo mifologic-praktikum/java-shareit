@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.*;
-import ru.practicum.shareit.booking.dto.ItemBookingDto;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -25,8 +24,4 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User owner;
-    @Transient
-    private ItemBookingDto lastBooking;
-    @Transient
-    private ItemBookingDto nextBooking;
 }

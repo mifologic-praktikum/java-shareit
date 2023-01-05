@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.item.comments.CommentMapper.toCommentDto;
+
 @Service
 @Transactional
 public class ItemServiceImpl implements ItemService {
@@ -44,14 +46,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findAllItems(Long userId) {
-        List<Item> userItems = new ArrayList<>();
+        List<ItemDto> userItems = new ArrayList<>();
         for (Item item : itemRepository.findAll()) {
             if (Objects.equals(item.getOwner().getId(), userId)) {
-                userItems.add(item);
-                setItemBookings(item);
+                ItemDto itemDto = setItemBookings(ItemMapper.toItemDto(item));
+                userItems.add(itemDto);
             }
         }
-        return ItemMapper.toListItemDto(userItems);
+        return userItems;
     }
 
     @Override
@@ -59,11 +61,12 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Item with id= " + itemId + " not found")
         );
-        if (item.getOwner().getId().equals(userId)) {
-            setItemBookings(item);
-        }
         ItemDto itemDto = ItemMapper.toItemDto(item);
-        itemDto.setComments(CommentMapper.toListCommentDto(commentRepository.findAllByItemId(itemId)));
+        if (item.getOwner().getId().equals(userId)) {
+            setItemBookings(itemDto);
+        }
+        List<ItemDto.CommentDto> commentsDto = toListItemCommentDto(commentRepository.findAllByItemId(itemId));
+        itemDto.setComments(commentsDto);
         return itemDto;
     }
 
@@ -123,15 +126,6 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.deleteById(itemId);
     }
 
-    private Item setItemBookings(Item item) {
-        LocalDateTime now = LocalDateTime.now();
-        bookingRepository.findLastItemBooking(item.getId(), now)
-                .ifPresent(booking -> item.setLastBooking(BookingMapper.toItemBookingDto(booking)));
-        bookingRepository.findNextItemBooking(item.getId(), now)
-                .ifPresent(booking -> item.setNextBooking(BookingMapper.toItemBookingDto(booking)));
-        return item;
-    }
-
     @Override
     public CommentDto addComment(CommentDto commentDto, Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
@@ -154,6 +148,24 @@ public class ItemServiceImpl implements ItemService {
         comment.setItem(item);
         comment.setAuthor(user);
         commentRepository.save(comment);
-        return CommentMapper.toCommentDto(comment);
+        return toCommentDto(comment);
+    }
+
+    private ItemDto setItemBookings(ItemDto itemDto) {
+        LocalDateTime now = LocalDateTime.now();
+        bookingRepository.findLastItemBooking(itemDto.getId(), now)
+                .ifPresent(booking -> itemDto.setLastBooking(new ItemDto.ItemBookingDto(booking.getId(), booking.getBooker().getId())));
+        bookingRepository.findNextItemBooking(itemDto.getId(), now)
+                .ifPresent(booking -> itemDto.setNextBooking(new ItemDto.ItemBookingDto(booking.getId(), booking.getBooker().getId())));
+        return itemDto;
+    }
+
+    private static List<ItemDto.CommentDto> toListItemCommentDto(List<Comment> comments) {
+        List<ItemDto.CommentDto> commentDtos = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentDtos.add(new ItemDto.CommentDto(comment.getId(), comment.getText(), comment.getAuthor().getName(),
+                    comment.getCreated()));
+        }
+        return commentDtos;
     }
 }

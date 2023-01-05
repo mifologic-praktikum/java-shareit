@@ -15,9 +15,7 @@ public class ItemMapper {
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                owner,
-                itemDto.getLastBooking(),
-                itemDto.getNextBooking());
+                owner);
     }
 
     public static ItemDto toItemDto(Item item) {
@@ -26,8 +24,6 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .lastBooking(item.getLastBooking())
-                .nextBooking(item.getNextBooking())
                 .build();
     }
 
