@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 
 @RestControllerAdvice
@@ -25,15 +26,16 @@ public class ExceptionHandle {
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handleInternalServerError(final ServerException e) {
-        log.info("500 {}", e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler
     public ResponseEntity<String> handleValidationException(final ValidationException e) {
         log.info("400 {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(final MethodArgumentTypeMismatchException e) {
+        String error = "Unknown " + e.getName() + ": " + e.getValue();
+        log.error(error);
+        return ResponseEntity.status(400).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler
@@ -45,6 +47,18 @@ public class ExceptionHandle {
     @ExceptionHandler
     public ResponseEntity<String> handleThrowable(final Throwable e) {
         log.info(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler
+    ResponseEntity<String> handleUserHasNoBookingsException(final UserHasNoBookings e) {
+        log.info(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleInternalServerError(final ServerException e) {
+        log.info("500 {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
