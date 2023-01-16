@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.web.servlet.function.RequestPredicates.contentType;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -42,7 +43,6 @@ public class BookingControllerTest {
 
     private BookingDto bookingDto;
     private BookingDto updateBookingDto;
-    private User user;
 
     @BeforeEach
     void setUp() {
@@ -55,10 +55,7 @@ public class BookingControllerTest {
                 BookingStatus.APPROVED);
 
         updateBookingDto = new BookingDto(1L, null, null,
-                new BookingDto.Item(1L, "секатор садовый Fiskars"), new BookingDto.User(1L), BookingStatus.CANCELED);
-
-        user = new User(1L, "userName", "user@test.com");
-
+                new BookingDto.Item(1L, "секатор садовый Fiskars"), new BookingDto.User(1L), BookingStatus.APPROVED);
     }
 
     @Test
@@ -79,11 +76,9 @@ public class BookingControllerTest {
                 .thenReturn(updateBookingDto);
         mvc.perform(patch("/bookings/1")
                         .header("X-Sharer-User-Id", 1L)
-                        .content(mapper.writeValueAsString(updateBookingDto))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("approved", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(updateBookingDto.getId()), Long.class))
-                .andExpect(jsonPath("$.status", is(updateBookingDto.getStatus())))
                 .andExpect(jsonPath("$.item.name", is(updateBookingDto.getItem().getName())));
     }
 

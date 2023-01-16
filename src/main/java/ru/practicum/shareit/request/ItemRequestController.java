@@ -8,9 +8,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @RestController
 @Slf4j
 @RequestMapping(path = "/requests")
