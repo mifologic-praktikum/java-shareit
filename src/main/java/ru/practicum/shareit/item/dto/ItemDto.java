@@ -26,6 +26,7 @@ public class ItemDto {
     private ItemBookingDto lastBooking;
     private ItemBookingDto nextBooking;
     private List<CommentDto> comments;
+    private Long requestId;
 
     @Getter
     @Setter
@@ -51,7 +52,5 @@ public class ItemDto {
         private String authorName;
         private LocalDateTime created;
     }
-
-
 }
 

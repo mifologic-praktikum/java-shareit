@@ -1,10 +1,13 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UserHasNoBookings;
 import ru.practicum.shareit.exception.ValidationException;
@@ -14,6 +17,8 @@ import ru.practicum.shareit.item.comments.CommentMapper;
 import ru.practicum.shareit.item.comments.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -34,19 +39,25 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
 
     @Override
-    public List<ItemDto> findAllItems(Long userId) {
+    public List<ItemDto> findAllItems(Long userId, int from, int size) {
         List<ItemDto> userItems = new ArrayList<>();
-        for (Item item : itemRepository.findAll()) {
+        if (from < 0) {
+            throw new BadRequestException("Can't be negative");
+        }
+        Pageable pageable = PageRequest.of((from / size), size);
+        for (Item item : itemRepository.findAll(pageable)) {
             if (Objects.equals(item.getOwner().getId(), userId)) {
                 ItemDto itemDto = setItemBookings(ItemMapper.toItemDto(item));
                 userItems.add(itemDto);
@@ -70,11 +81,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(String text) {
+    public List<ItemDto> searchItems(String text, int from, int size) {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return ItemMapper.toListItemDto(itemRepository.findAll().stream()
+        if (from < 0) {
+            throw new BadRequestException("Can't be negative");
+        }
+        Pageable pageable = PageRequest.of((from / size), size);
+        return ItemMapper.toListItemDto(itemRepository.findAll(pageable).stream()
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) ||
                         item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .filter(Item::getAvailable)
@@ -89,6 +104,12 @@ public class ItemServiceImpl implements ItemService {
         );
         Item item = ItemMapper.toItem(itemDto, owner);
         item.setOwner(owner);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElse(new ItemRequest());
+            item.setItemRequest(itemRequest);
+            Item itemToRepositoryWithRequest = itemRepository.save(item);
+            return ItemMapper.toItemDtoWithRequest(itemToRepositoryWithRequest);
+        }
         Item itemToRepository = itemRepository.save(item);
         return ItemMapper.toItemDto(itemToRepository);
     }

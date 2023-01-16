@@ -10,12 +10,12 @@ import java.util.List;
 public class ItemMapper {
 
     public static Item toItem(ItemDto itemDto, User owner) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                owner);
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(owner).build();
     }
 
     public static ItemDto toItemDto(Item item) {
@@ -24,6 +24,16 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
+                .build();
+    }
+
+    public static ItemDto toItemDtoWithRequest(Item item) {
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getItemRequest().getId())
                 .build();
     }
 

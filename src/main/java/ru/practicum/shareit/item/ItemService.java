@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface ItemService {
 
-    List<ItemDto> findAllItems(Long userId);
+    List<ItemDto> findAllItems(Long userId, int from, int size);
 
     ItemDto findItemById(Long userId, Long itemId);
 
-    List<ItemDto> searchItems(String text);
+    List<ItemDto> searchItems(String text, int from, int size);
 
     ItemDto createItem(ItemDto itemDto, Long userId);
 
