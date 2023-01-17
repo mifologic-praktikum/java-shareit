@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.item.comments.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +30,8 @@ public class ItemControllerTest {
 
     @Mock
     ItemService itemService;
+    @Mock
+    ItemMapper itemMapper;
 
     @InjectMocks
     ItemController itemController;
@@ -41,12 +44,15 @@ public class ItemControllerTest {
     private ItemDto updateItem;
     private CommentDto commentDto;
 
+    private User user;
+
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders
                 .standaloneSetup(itemController)
                 .build();
 
+        user = new User(1L, "userName", "user@test.com");
         itemDto = new ItemDto(1L, "Шуруповёрт Makita", "Надёжный шуруповёрт", true,
                 null, null, null, 1L);
         updateItem = new ItemDto(1L, "Шуруповёрт Makita", "Очень надёжный шуруповёрт", true,
@@ -94,6 +100,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
                 .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
+        verify(itemService, times(1)).findItemById(1L, 1L);
     }
 
     @Test

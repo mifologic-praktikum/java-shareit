@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.comments.CommentMapper.toCommentDto;
-
 @Service
 @Transactional
 public class ItemServiceImpl implements ItemService {
@@ -40,16 +38,17 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
-
     private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository, ItemMapper itemMapper) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository, ItemMapper itemMapper, CommentMapper commentMapper) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.itemRequestRepository = itemRequestRepository;
         this.itemMapper = itemMapper;
+        this.commentMapper = commentMapper;
     }
 
 
@@ -166,12 +165,12 @@ public class ItemServiceImpl implements ItemService {
         if (commentDto.getText().isBlank() || commentDto.getText() == null) {
             throw new ValidationException("Text can't be empty");
         }
-        Comment comment = CommentMapper.fromCommentDto(commentDto);
+        Comment comment = commentMapper.fromCommentDto(commentDto);
         comment.setCreated(LocalDateTime.now());
         comment.setItem(item);
         comment.setAuthor(user);
         commentRepository.save(comment);
-        return toCommentDto(comment);
+        return commentMapper.toCommentDto(comment);
     }
 
     private ItemDto setItemBookings(ItemDto itemDto) {
