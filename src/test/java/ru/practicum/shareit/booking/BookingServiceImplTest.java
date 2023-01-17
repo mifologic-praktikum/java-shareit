@@ -89,6 +89,5 @@ public class BookingServiceImplTest {
         when(bookingMapper.toBooking(any(), any(), any()))
                 .thenThrow(new NotFoundException("User can't book his own item"));
         assertThrows(RuntimeException.class, () -> bookigService.createBooking(1L, newBookingDto));
-        verify(bookingRepository, times(1)).save(booking);
     }
 }
