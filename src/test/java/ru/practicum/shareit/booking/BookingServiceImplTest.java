@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -99,6 +100,7 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.of(owner));
         when(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(anyLong(), PageRequest.of(anyInt(), 10)))
                 .thenReturn(Collections.singletonList(booking));
+        bookigService.findBookingsByOwner(1L, BookingState.ALL, 0, 10);
         verify(bookingRepository, times(1)).findAllByItem_Owner_IdOrderByIdDesc(1L, PageRequest.of(0, 10));
     }
 }
