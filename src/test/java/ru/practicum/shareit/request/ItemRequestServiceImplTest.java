@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -108,7 +109,7 @@ public class ItemRequestServiceImplTest {
                 .thenReturn(requests);
         itemRequestService.findAllItemsRequests(user.getId(), 0, 10);
         verify(itemRequestRepository, times(1))
-                .findAllByRequesterIdIsNotOrderByCreatedDesc(1L, PageRequest.of(anyInt(), 10));
+                .findAllByRequesterIdIsNotOrderByCreatedDesc(1L, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created")));
     }
 
 
