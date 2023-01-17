@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -7,9 +8,10 @@ import ru.practicum.shareit.user.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ItemMapper {
 
-    public static Item toItem(ItemDto itemDto, User owner) {
+    public Item toItem(ItemDto itemDto, User owner) {
         return Item.builder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())
@@ -18,7 +20,7 @@ public class ItemMapper {
                 .owner(owner).build();
     }
 
-    public static ItemDto toItemDto(Item item) {
+    public ItemDto toItemDto(Item item) {
         return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -27,7 +29,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public static ItemDto toItemDtoWithRequest(Item item) {
+    public ItemDto toItemDtoWithRequest(Item item) {
         return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -37,7 +39,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public static List<ItemDto> toListItemDto(List<Item> itemList) {
+    public List<ItemDto> toListItemDto(List<Item> itemList) {
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : itemList) {
             itemDtos.add(toItemDto(item));
