@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -18,6 +19,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -89,5 +91,14 @@ public class BookingServiceImplTest {
         when(bookingMapper.toBooking(any(), any(), any()))
                 .thenThrow(new NotFoundException("User can't book his own item"));
         assertThrows(RuntimeException.class, () -> bookigService.createBooking(1L, newBookingDto));
+    }
+
+    @Test
+    void findBookingsByOwnerAllStateTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(owner));
+        when(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(anyLong(), PageRequest.of(anyInt(), 10)))
+                .thenReturn(Collections.singletonList(booking));
+        verify(bookingRepository, times(1)).findAllByItem_Owner_IdOrderByIdDesc(1L, PageRequest.of(0, 10));
     }
 }
