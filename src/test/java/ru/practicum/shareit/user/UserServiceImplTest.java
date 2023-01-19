@@ -8,8 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,4 +52,14 @@ public class UserServiceImplTest  {
         userService.findUserById(user.getId());
         verify(userRepository, times(1)).findById(1L);
     }
+
+    @Test
+    void findAllUsers() {
+        when(userMapper.toListUserDto(anyList()))
+                .thenReturn(Collections.singletonList(userDto));
+        List<UserDto> userDtos = userService.findAllUsers();
+        assertNotNull(userDtos);
+    }
+
+
 }
