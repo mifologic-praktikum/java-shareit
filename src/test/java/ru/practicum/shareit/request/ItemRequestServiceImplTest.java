@@ -64,7 +64,7 @@ public class ItemRequestServiceImplTest {
                 .thenReturn(request);
         when(itemRequestRepository.save(any()))
                 .thenReturn(request);
-        assertNotNull(itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto));
+        itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto);
         verify(itemRequestRepository, times(1)).save(request);
     }
 

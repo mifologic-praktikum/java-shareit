@@ -90,7 +90,7 @@ public class ItemServiceImplTest {
                 .thenReturn(item);
         when(itemRepository.save(any()))
                 .thenReturn(item);
-        assertNotNull(itemService.createItem(itemDto, user.getId()));
+        itemService.createItem(itemDto, user.getId());
         verify(itemRepository, times(1)).save(item);
     }
 

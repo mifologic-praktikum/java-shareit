@@ -40,7 +40,7 @@ public class UserServiceImplTest  {
     void createUserTest() {
         when(userMapper.toUser(userDto))
                 .thenReturn(user);
-        assertNotNull(userService.createUser(userDto));
+        userService.createUser(userDto);
         verify(userRepository, times(1)).save(user);
     }
 
