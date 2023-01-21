@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -12,8 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +40,7 @@ public class UserServiceImplTest  {
     void createUserTest() {
         when(userMapper.toUser(userDto))
                 .thenReturn(user);
-        userService.createUser(userDto);
+        assertNotNull(userService.createUser(userDto));
         verify(userRepository, times(1)).save(user);
     }
 
@@ -50,8 +50,13 @@ public class UserServiceImplTest  {
                 .thenReturn(Optional.ofNullable(user));
         when(userMapper.toUserDto(any()))
                 .thenReturn(userDto);
-        userService.findUserById(user.getId());
+        assertNotNull(userService.findUserById(user.getId()));
         verify(userRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void userNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> userService.findUserById(42L));
     }
 
     @Test

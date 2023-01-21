@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -22,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -62,8 +64,7 @@ public class ItemRequestServiceImplTest {
                 .thenReturn(request);
         when(itemRequestRepository.save(any()))
                 .thenReturn(request);
-
-        itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto);
+        assertNotNull(itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto));
         verify(itemRequestRepository, times(1)).save(request);
     }
 
@@ -83,7 +84,7 @@ public class ItemRequestServiceImplTest {
                 .thenReturn(Optional.of(request));
         when(itemRequestMapper.toItemRequestDto(any()))
                 .thenReturn(itemRequestGetDto);
-        itemRequestService.findItemRequestById(user.getId(), request.getId());
+        assertNotNull(itemRequestService.findItemRequestById(user.getId(), request.getId()));
         verify(itemRequestRepository, times(1)).findById(1L);
     }
 
@@ -92,6 +93,11 @@ public class ItemRequestServiceImplTest {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         assertThrows(NotFoundException.class, () -> itemRequestService.findItemRequestById(user.getId(), 42L));
+    }
+
+    @Test
+    void findItemRequestByIdUserNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> itemRequestService.findItemRequestById(42L, 1L));
     }
 
     @Test
@@ -117,6 +123,13 @@ public class ItemRequestServiceImplTest {
         itemRequestService.findAllItemsRequests(user.getId(), 0, 10);
         verify(itemRequestRepository, times(1))
                 .findAllByRequesterIdIsNotOrderByCreatedDesc(1L, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created")));
+    }
+
+    @Test
+    void findAllItemsRequestsNegativeTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        assertThrows(BadRequestException.class, () -> itemRequestService.findAllItemsRequests(user.getId(), -2, 10));
     }
 
 

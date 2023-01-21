@@ -14,6 +14,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.UserHasNoBookings;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comments.Comment;
 import ru.practicum.shareit.item.comments.CommentDto;
 import ru.practicum.shareit.item.comments.CommentMapper;
@@ -29,8 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -89,7 +90,7 @@ public class ItemServiceImplTest {
                 .thenReturn(item);
         when(itemRepository.save(any()))
                 .thenReturn(item);
-        itemService.createItem(itemDto, user.getId());
+        assertNotNull(itemService.createItem(itemDto, user.getId()));
         verify(itemRepository, times(1)).save(item);
     }
 
@@ -105,6 +106,31 @@ public class ItemServiceImplTest {
                 .thenReturn(Collections.singletonList(booking));
         itemService.addComment(commentDto, 1L, 1L);
         verify(commentRepository, times(1)).save(comment);
+    }
+
+    @Test
+    void addCommentUserHasNoBookingTest() {
+        when(commentMapper.fromCommentDto(any()))
+                .thenReturn(comment);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        assertThrows(UserHasNoBookings.class, () -> itemService.addComment(commentDto, 1L, 1L));
+    }
+
+    @Test
+    void addCommentCommentDtoTextIsEmptyTest() {
+        CommentDto commentDtoEmptyText = new CommentDto(1L, "", item.getName(), LocalDateTime.now());
+        when(commentMapper.fromCommentDto(any()))
+                .thenReturn(comment);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(bookingRepository.findAllByItemAndBookerIdAndStatusAndEndBefore(any(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(booking));
+        assertThrows(ValidationException.class, () -> itemService.addComment(commentDtoEmptyText, 1L, 1L));
     }
 
     @Test
@@ -142,7 +168,7 @@ public class ItemServiceImplTest {
         final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
         when(itemRepository.findAll(PageRequest.of(0, 10)))
                 .thenReturn(itemPage);
-        itemService.searchItems("газовая горелка", 0, 10);
+        assertNotNull(itemService.searchItems("газовая горелка", 0, 10));
         verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
     }
 

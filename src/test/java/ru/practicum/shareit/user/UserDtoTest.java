@@ -24,7 +24,6 @@ public class UserDtoTest {
         assertThat(resultJson).hasJsonPath("$.email");
         assertThat(resultJson).extractingJsonPathValue("$.name").isEqualTo(userDto.getName());
         assertThat(resultJson).extractingJsonPathValue("$.email").isEqualTo(userDto.getEmail());
-
     }
 
 
