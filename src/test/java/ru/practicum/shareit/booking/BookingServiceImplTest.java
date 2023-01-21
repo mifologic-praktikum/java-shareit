@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -92,6 +93,17 @@ public class BookingServiceImplTest {
         when(bookingMapper.toBooking(any(), any(), any()))
                 .thenThrow(new NotFoundException("User can't book his own item"));
         assertThrows(RuntimeException.class, () -> bookigService.createBooking(1L, newBookingDto));
+    }
+
+    @Test
+    void createBookingUnavailableITest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        item.setAvailable(false);
+        assertThrows(BadRequestException.class, () ->
+                bookigService.createBooking(2L, newBookingDto));
     }
 
 

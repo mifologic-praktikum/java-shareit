@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -47,7 +48,7 @@ public class UserServiceImplTest  {
     void findUserByIdTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(userService.findUserById(anyLong()))
+        when(userMapper.toUserDto(any()))
                 .thenReturn(userDto);
         userService.findUserById(user.getId());
         verify(userRepository, times(1)).findById(1L);
@@ -59,6 +60,21 @@ public class UserServiceImplTest  {
                 .thenReturn(Collections.singletonList(userDto));
         List<UserDto> userDtos = userService.findAllUsers();
         assertNotNull(userDtos);
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    void updateUserTest() {
+        UserDto userDtoUpdate = new UserDto(1L, "userName", "userUpdate@test.com");
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user));
+        when(userMapper.toUser(any()))
+                .thenReturn(user);
+        when(userMapper.toUserDto(any()))
+                .thenReturn(userDtoUpdate);
+        UserDto update = userService.updateUser(1L, userDtoUpdate);
+        assertEquals("userUpdate@test.com", update.getEmail());
+        verify(userRepository, times(1)).findById(1L);
     }
 
 

@@ -88,6 +88,13 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
+    void findItemRequestByIdItemRequestNotFoundTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        assertThrows(NotFoundException.class, () -> itemRequestService.findItemRequestById(user.getId(), 42L));
+    }
+
+    @Test
     void findAllUserItemsRequestsTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
