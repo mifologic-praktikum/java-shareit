@@ -22,5 +22,10 @@ public class ItemDtoTest {
         assertThat(resultJson).hasJsonPath("$.id");
         assertThat(resultJson).hasJsonPath("$.name");
         assertThat(resultJson).hasJsonPath("$.description");
+        assertThat(resultJson).hasJsonPath("$.available");
+        assertThat(resultJson).hasJsonPath("$.lastBooking");
+        assertThat(resultJson).hasJsonPath("$.nextBooking");
+        assertThat(resultJson).hasJsonPath("$.comments");
+        assertThat(resultJson).hasJsonPath("$.requestId");
     }
 }
