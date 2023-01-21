@@ -106,6 +106,44 @@ public class BookingServiceImplTest {
                 bookigService.createBooking(2L, newBookingDto));
     }
 
+    @Test
+    void createBookingUserCantBookTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(bookingMapper.toBooking(any(), any(), any()))
+                .thenReturn(booking);
+        assertThrows(NotFoundException.class, () ->
+                bookigService.createBooking(1L, newBookingDto));
+    }
+
+    @Test
+    void createBookingGetEndIsBeforeTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(bookingMapper.toBooking(any(), any(), any()))
+                .thenReturn(booking);
+        booking.setEnd(LocalDateTime.of(2023, 12, 10, 13, 48, 48));
+        assertThrows(BadRequestException.class, () ->
+                bookigService.createBooking(2L, newBookingDto));
+    }
+
+    @Test
+    void createBookingGetStartIsBeforeTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(bookingMapper.toBooking(any(), any(), any()))
+                .thenReturn(booking);
+        booking.setStart(LocalDateTime.of(2022, 12, 10, 13, 48, 48));
+        assertThrows(BadRequestException.class, () ->
+                bookigService.createBooking(2L, newBookingDto));
+    }
+
 
     @Test
     void findBookingByIdTest() {
@@ -228,8 +266,14 @@ public class BookingServiceImplTest {
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
         booking.setStatus(BookingStatus.APPROVED);
-        assertThrows(RuntimeException.class, ()
+        assertThrows(BadRequestException.class, ()
                 -> bookigService.updateBooking(1L, booking.getId(), true));
         verify(bookingRepository, times(0)).save(booking);
+    }
+
+    @Test
+    void updateBookingBookingNotFoundTest() {
+        assertThrows(NotFoundException.class, ()
+                -> bookigService.updateBooking(1L, 42L, true));
     }
 }
