@@ -62,9 +62,12 @@ public class ItemRequestServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemRequestMapper.toItemRequest(any(), any()))
                 .thenReturn(request);
+        when(itemRequestMapper.toItemRequestDto(any()))
+                .thenReturn(itemRequestCreateDto);
         when(itemRequestRepository.save(any()))
                 .thenReturn(request);
-        itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto);
+        ItemRequestDto itemRequestDtoCreated = itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto);
+        assertNotNull(itemRequestDtoCreated);
         verify(itemRequestRepository, times(1)).save(request);
     }
 

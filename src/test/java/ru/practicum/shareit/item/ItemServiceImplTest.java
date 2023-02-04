@@ -88,9 +88,12 @@ public class ItemServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemMapper.toItem(any(), any()))
                 .thenReturn(item);
+        when(itemMapper.toItemDto(any()))
+                .thenReturn(itemDto);
         when(itemRepository.save(any()))
                 .thenReturn(item);
-        itemService.createItem(itemDto, user.getId());
+        ItemDto itemDtoCreated = itemService.createItem(itemDto, user.getId());
+        assertNotNull(itemDtoCreated);
         verify(itemRepository, times(1)).save(item);
     }
 

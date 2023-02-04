@@ -80,7 +80,10 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.ofNullable(item));
         when(bookingMapper.toBooking(any(), any(), any()))
                 .thenReturn(booking);
-        bookigService.createBooking(2L, newBookingDto);
+        when(bookingMapper.toBookingDto(any()))
+                .thenReturn(bookingDto);
+        BookingDto bookingDtoCreated = bookigService.createBooking(2L, newBookingDto);
+        assertNotNull(bookingDtoCreated);
         verify(bookingRepository, times(1)).save(booking);
     }
 

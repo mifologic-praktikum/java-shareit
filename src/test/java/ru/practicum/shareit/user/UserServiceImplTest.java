@@ -38,9 +38,12 @@ public class UserServiceImplTest  {
 
     @Test
     void createUserTest() {
-        when(userMapper.toUser(userDto))
+        when(userMapper.toUser(any()))
                 .thenReturn(user);
-        userService.createUser(userDto);
+        when(userMapper.toUserDto(any()))
+                .thenReturn(userDto);
+        UserDto userCreated = userService.createUser(userDto);
+        assertNotNull(userCreated);
         verify(userRepository, times(1)).save(user);
     }
 
@@ -50,7 +53,9 @@ public class UserServiceImplTest  {
                 .thenReturn(Optional.ofNullable(user));
         when(userMapper.toUserDto(any()))
                 .thenReturn(userDto);
-        assertNotNull(userService.findUserById(user.getId()));
+        UserDto userFound = userService.findUserById(user.getId());
+        assertNotNull(userFound);
+        assertEquals(1L, userFound.getId());
         verify(userRepository, times(1)).findById(1L);
     }
 
