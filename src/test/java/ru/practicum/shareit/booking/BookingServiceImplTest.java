@@ -195,7 +195,7 @@ public class BookingServiceImplTest {
                 .thenReturn(Collections.singletonList(booking));
         final List<BookingDto> bookingDtos = bookigService.findBookingsByOwner(1L, BookingState.FUTURE, 0, 10);
         assertNotNull(bookingDtos);
-           }
+    }
 
     @Test
     void findBookingsByOwnerPastStateTest() {
@@ -228,6 +228,46 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void findBookingsByUserAllStateTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findAllByBooker_IdOrderByIdDesc(anyLong(), PageRequest.of(anyInt(), 10)))
+                .thenReturn(Collections.singletonList(booking));
+        bookigService.findBookingByUser(2L, BookingState.ALL, 0, 10);
+        verify(bookingRepository, times(1)).findAllByBooker_IdOrderByIdDesc(2L, PageRequest.of(0, 10));
+    }
+
+    @Test
+    void findBookingsByUserCurrentStateTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(owner));
+        when(bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfter(anyLong(), any(), any(), PageRequest.of(anyInt(), 10)))
+                .thenReturn(Collections.singletonList(booking));
+        final List<BookingDto> bookingDtos = bookigService.findBookingByUser(2L, BookingState.CURRENT, 0, 10);
+        assertNotNull(bookingDtos);
+    }
+
+    @Test
+    void findBookingsByUserFutureStateTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(owner));
+        when(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+                .thenReturn(Collections.singletonList(booking));
+        final List<BookingDto> bookingDtos = bookigService.findBookingByUser(2L, BookingState.FUTURE, 0, 10);
+        assertNotNull(bookingDtos);
+    }
+
+    @Test
+    void findBookingsByUserPastStateTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(owner));
+        when(bookingRepository.findAllByBooker_IdAndEndBefore(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+                .thenReturn(Collections.singletonList(booking));
+        final List<BookingDto> bookingDtos = bookigService.findBookingByUser(2L, BookingState.PAST, 0, 10);
+        assertNotNull(bookingDtos);
+    }
+
+    @Test
     void findBookingByUserWaitingStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(owner));
@@ -252,6 +292,16 @@ public class BookingServiceImplTest {
         when(bookingMapper.toBookingDto(any()))
                 .thenReturn(bookingDto);
         bookigService.updateBooking(1L, booking.getId(), true);
+        verify(bookingRepository, times(1)).save(booking);
+    }
+
+    @Test
+    void updateBookingRejectedTest() {
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(booking));
+        when(bookingMapper.toBookingDto(any()))
+                .thenReturn(bookingDto);
+        bookigService.updateBooking(1L, booking.getId(), false);
         verify(bookingRepository, times(1)).save(booking);
     }
 

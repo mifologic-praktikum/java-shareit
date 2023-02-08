@@ -83,6 +83,45 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void findAllItemsTest() {
+        when(itemMapper.toItemDto(any()))
+                .thenReturn(itemDto);
+        final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
+        when(itemRepository.findAll(PageRequest.of(0, 10)))
+                .thenReturn(itemPage);
+        itemService.findAllItems(1L, 0, 10);
+        verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
+    }
+
+    @Test
+    void findItemByIdTest() {
+        when(itemMapper.toItemDto(any()))
+                .thenReturn(itemDto);
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        when(commentRepository.findAllByItemId(anyLong()))
+                .thenReturn(Collections.singletonList(comment));
+        itemService.findItemById(1L, 1L);
+        verify(itemRepository, times(1)).findById(item.getId());
+    }
+
+    @Test
+    void searchItemsTest() {
+        when(itemMapper.toListItemDto(anyList()))
+                .thenReturn(Collections.singletonList(itemDto));
+        final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
+        when(itemRepository.findAll(PageRequest.of(0, 10)))
+                .thenReturn(itemPage);
+        assertNotNull(itemService.searchItems("газовая горелка", 0, 10));
+        verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
+    }
+
+    @Test
+    void searchItemsTextIsBlankTest() {
+        assertEquals(Collections.emptyList(), itemService.searchItems("", 0, 10));
+    }
+
+    @Test
     void createItemTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
@@ -93,6 +132,24 @@ public class ItemServiceImplTest {
         when(itemRepository.save(any()))
                 .thenReturn(item);
         ItemDto itemDtoCreated = itemService.createItem(itemDto, user.getId());
+        assertNotNull(itemDtoCreated);
+        verify(itemRepository, times(1)).save(item);
+    }
+
+    @Test
+    void createItemWithRequestTest() {
+        ItemDto itemWithRequestDto = new ItemDto(1L, "газовая горелка", "подойдёт для всех видов работ", true, null, null, null, 1L);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemMapper.toItem(any(), any()))
+                .thenReturn(item);
+        when(itemRequestRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(itemRequest));
+        when(itemMapper.toItemDtoWithRequest(any()))
+                .thenReturn(itemWithRequestDto);
+        when(itemRepository.save(any()))
+                .thenReturn(item);
+        ItemDto itemDtoCreated = itemService.createItem(itemWithRequestDto, user.getId());
         assertNotNull(itemDtoCreated);
         verify(itemRepository, times(1)).save(item);
     }
@@ -137,42 +194,18 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void findItemByIdTest() {
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(itemDto);
-        when(itemRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(commentRepository.findAllByItemId(anyLong()))
-                .thenReturn(Collections.singletonList(comment));
-        itemService.findItemById(1L, 1L);
-        verify(itemRepository, times(1)).findById(item.getId());
+    void createItemUserNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> itemService.createItem(itemDto, 42L));
+    }
+
+    @Test
+    void itemNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> itemService.findItemById(1L, 42L));
     }
 
     @Test
     void findAllItemsBadRequest() {
         assertThrows(BadRequestException.class, () -> itemService.findAllItems(1L, -1, 10));
-    }
-
-    @Test
-    void findAllItemsTest() {
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(itemDto);
-        final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
-        when(itemRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(itemPage);
-        itemService.findAllItems(1L, 0, 10);
-        verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
-    }
-
-    @Test
-    void searchItemsTest() {
-        when(itemMapper.toListItemDto(anyList()))
-                .thenReturn(Collections.singletonList(itemDto));
-        final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
-        when(itemRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(itemPage);
-        assertNotNull(itemService.searchItems("газовая горелка", 0, 10));
-        verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
     }
 
     @Test

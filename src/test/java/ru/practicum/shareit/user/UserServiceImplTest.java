@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest  {
+public class UserServiceImplTest {
 
     private UserServiceImpl userService;
 
@@ -37,14 +37,12 @@ public class UserServiceImplTest  {
     }
 
     @Test
-    void createUserTest() {
-        when(userMapper.toUser(any()))
-                .thenReturn(user);
-        when(userMapper.toUserDto(any()))
-                .thenReturn(userDto);
-        UserDto userCreated = userService.createUser(userDto);
-        assertNotNull(userCreated);
-        verify(userRepository, times(1)).save(user);
+    void findAllUsersTest() {
+        when(userMapper.toListUserDto(anyList()))
+                .thenReturn(Collections.singletonList(userDto));
+        List<UserDto> userDtos = userService.findAllUsers();
+        assertNotNull(userDtos);
+        verify(userRepository, times(1)).findAll();
     }
 
     @Test
@@ -65,12 +63,16 @@ public class UserServiceImplTest  {
     }
 
     @Test
-    void findAllUsers() {
-        when(userMapper.toListUserDto(anyList()))
-                .thenReturn(Collections.singletonList(userDto));
-        List<UserDto> userDtos = userService.findAllUsers();
-        assertNotNull(userDtos);
-        verify(userRepository, times(1)).findAll();
+    void createUserTest() {
+        when(userMapper.toUser(any()))
+                .thenReturn(user);
+        when(userRepository.save(any()))
+                .thenReturn(user);
+        when(userMapper.toUserDto(any()))
+                .thenReturn(userDto);
+        UserDto userCreated = userService.createUser(userDto);
+        assertNotNull(userCreated);
+        verify(userRepository, times(1)).save(user);
     }
 
     @Test
@@ -87,5 +89,9 @@ public class UserServiceImplTest  {
         verify(userRepository, times(1)).findById(1L);
     }
 
-
+    @Test
+    void userUpdateUserNotFound() {
+        UserDto userDtoUpdate = new UserDto(1L, "userName", "userUpdate@test.com");
+        assertThrows(NotFoundException.class, () -> userService.updateUser(42L, userDtoUpdate));
+    }
 }
