@@ -147,6 +147,10 @@ public class BookingServiceImplTest {
                 bookigService.createBooking(2L, newBookingDto));
     }
 
+    @Test
+    void createBookingUserNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> bookigService.createBooking(42L, newBookingDto));
+    }
 
     @Test
     void findBookingByIdTest() {
@@ -165,6 +169,11 @@ public class BookingServiceImplTest {
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
         assertThrows(RuntimeException.class, () -> bookigService.findBookingById(6L, booking.getId()));
+    }
+
+    @Test
+    void findBookingByIdBookingNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> bookigService.findBookingById(1L, 42L));
     }
 
     @Test
@@ -191,7 +200,7 @@ public class BookingServiceImplTest {
     void findBookingsByOwnerFutureStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(owner));
-        when(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+        when(bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(anyLong(), any(), PageRequest.of(anyInt(), 10)))
                 .thenReturn(Collections.singletonList(booking));
         final List<BookingDto> bookingDtos = bookigService.findBookingsByOwner(1L, BookingState.FUTURE, 0, 10);
         assertNotNull(bookingDtos);
@@ -201,7 +210,7 @@ public class BookingServiceImplTest {
     void findBookingsByOwnerPastStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(owner));
-        when(bookingRepository.findAllByBooker_IdAndEndBefore(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+        when(bookingRepository.findAllByItem_Owner_IdAndEndBefore(anyLong(), any(), PageRequest.of(anyInt(), 10)))
                 .thenReturn(Collections.singletonList(booking));
         final List<BookingDto> bookingDtos = bookigService.findBookingsByOwner(1L, BookingState.PAST, 0, 10);
         assertNotNull(bookingDtos);
@@ -211,7 +220,7 @@ public class BookingServiceImplTest {
     void findBookingsByOwnerWaitingStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(owner));
-        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+        when(bookingRepository.findAllByItemOwnerIdAndStatus(anyLong(), any(), PageRequest.of(anyInt(), 10)))
                 .thenReturn(Collections.singletonList(booking));
         final List<BookingDto> bookingDtos = bookigService.findBookingsByOwner(1L, BookingState.WAITING, 0, 10);
         assertNotNull(bookingDtos);
@@ -221,10 +230,24 @@ public class BookingServiceImplTest {
     void findBookingsByOwnerRejectedStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(owner));
-        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+        when(bookingRepository.findAllByItemOwnerIdAndStatus(anyLong(), any(), PageRequest.of(anyInt(), 10)))
                 .thenReturn(Collections.singletonList(booking));
         final List<BookingDto> bookingDtos = bookigService.findBookingsByOwner(1L, BookingState.REJECTED, 0, 10);
         assertNotNull(bookingDtos);
+    }
+
+    @Test
+    void findBookingByOwnerUnknownState() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        assertThrows(IllegalArgumentException.class, () -> bookigService.findBookingsByOwner(1L, BookingState.valueOf("UNKNOWN"), 0, 10));
+    }
+
+    @Test
+    void findBookingsByOwnerNegativeTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        assertThrows(BadRequestException.class, () -> bookigService.findBookingsByOwner(1L, BookingState.WAITING, -2, 10));
     }
 
     @Test
@@ -278,11 +301,25 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void findBookingsByUserRejectedStateTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), PageRequest.of(anyInt(), 10)))
+                .thenReturn(Collections.singletonList(booking));
+        final List<BookingDto> bookingDtos = bookigService.findBookingByUser(2L, BookingState.REJECTED, 0, 10);
+        assertNotNull(bookingDtos);
+    }
+
+    @Test
     void findBookingByUserUnknownState() {
         when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.of(owner));
+                .thenReturn(Optional.of(user));
         assertThrows(IllegalArgumentException.class, () -> bookigService.findBookingByUser(1L, BookingState.valueOf("UNKNOWN"), 0, 10));
+    }
 
+    @Test
+    void findByUserUserNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> bookigService.findBookingByUser(42L, BookingState.REJECTED, 0, 10));
     }
 
     @Test

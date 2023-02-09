@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
@@ -46,12 +47,14 @@ public class ItemRequestServiceImplTest {
     private ItemRequestDto itemRequestCreateDto;
     private ItemRequestDto itemRequestGetDto;
     private User user;
+    private Item item;
 
     @BeforeEach
     void setUp() {
         itemRequestService = new ItemRequestServiceImpl(itemRequestRepository, itemRepository, userRepository, itemRequestMapper);
         user = new User(1L, "userName", "user@test.com");
         request = new ItemRequest(1L, "газовая горелка", LocalDateTime.now(), user);
+        item = new Item(1L, "газовая горелка", "подойдёт для всех видов работ", true, user, request);
         itemRequestCreateDto = new ItemRequestDto(null, "газовая горелка", null, null);
         itemRequestGetDto = new ItemRequestDto(1L, "газовая горелка", LocalDateTime.now(), null);
     }
@@ -123,6 +126,8 @@ public class ItemRequestServiceImplTest {
         List<ItemRequest> requests = new ArrayList<>(Collections.singletonList(request));
         when(itemRequestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(anyLong(), PageRequest.of(anyInt(), 10)))
                 .thenReturn(requests);
+        when(itemRepository.findAllByItemRequest_Id(anyLong()))
+                .thenReturn(Collections.singletonList(item));
         itemRequestService.findAllItemsRequests(user.getId(), 0, 10);
         verify(itemRequestRepository, times(1))
                 .findAllByRequesterIdIsNotOrderByCreatedDesc(1L, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created")));

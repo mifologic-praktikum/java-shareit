@@ -101,6 +101,40 @@ public class BookingServiceImpl implements BookigService {
     }
 
     @Override
+    public List<BookingDto> findBookingsByOwner(Long userId, BookingState state, int from, int size) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("User with id=" + userId + " not found"));
+        List<Booking> bookingList = new ArrayList<>();
+        if (from < 0) {
+            throw new BadRequestException("Can't be negative");
+        }
+        Pageable pageable = PageRequest.of((from / size), size);
+        switch (state) {
+            case ALL:
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(userId, pageable));
+                break;
+            case CURRENT:
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), pageable));
+                break;
+            case FUTURE:
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(
+                        userId, LocalDateTime.now(), pageable));
+                break;
+            case PAST:
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndEndBefore(userId, LocalDateTime.now(), pageable));
+                break;
+            case WAITING:
+                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageable));
+                break;
+            case REJECTED:
+                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
+                break;
+        }
+        return bookingMapper.toListBookingDto(bookingList);
+    }
+
+    @Override
     public List<BookingDto> findBookingByUser(Long userId, BookingState state, int from, int size) {
         userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id=" + userId + " not found"));
@@ -132,40 +166,6 @@ public class BookingServiceImpl implements BookigService {
                 break;
             default:
                 throw new IllegalArgumentException("Unknown state: " + state);
-        }
-        return bookingMapper.toListBookingDto(bookingList);
-    }
-
-    @Override
-    public List<BookingDto> findBookingsByOwner(Long userId, BookingState state, int from, int size) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException("User with id=" + userId + " not found"));
-        List<Booking> bookingList = new ArrayList<>();
-        if (from < 0) {
-            throw new BadRequestException("Can't be negative");
-        }
-        Pageable pageable = PageRequest.of((from / size), size);
-        switch (state) {
-            case ALL:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(userId, pageable));
-                break;
-            case CURRENT:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now(), pageable));
-                break;
-            case FUTURE:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(
-                        userId, LocalDateTime.now(), pageable));
-                break;
-            case PAST:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndEndBefore(userId, LocalDateTime.now(), pageable));
-                break;
-            case WAITING:
-                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageable));
-                break;
-            case REJECTED:
-                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
-                break;
         }
         return bookingMapper.toListBookingDto(bookingList);
     }

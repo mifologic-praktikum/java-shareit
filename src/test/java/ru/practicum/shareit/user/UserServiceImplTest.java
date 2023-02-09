@@ -78,10 +78,11 @@ public class UserServiceImplTest {
     @Test
     void updateUserTest() {
         UserDto userDtoUpdate = new UserDto(1L, "userName", "userUpdate@test.com");
+        User userUpdate = new User(1L, "userName", "userUpdate@test.com");
         when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user));
+                .thenReturn(Optional.of(userUpdate));
         when(userMapper.toUser(any()))
-                .thenReturn(user);
+                .thenReturn(userUpdate);
         when(userMapper.toUserDto(any()))
                 .thenReturn(userDtoUpdate);
         UserDto update = userService.updateUser(1L, userDtoUpdate);
