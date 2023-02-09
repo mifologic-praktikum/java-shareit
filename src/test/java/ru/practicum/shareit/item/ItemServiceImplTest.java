@@ -194,6 +194,18 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void addCommentItemNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> itemService.addComment(commentDto, 42L, 1L));
+    }
+
+    @Test
+    void addCommentUserNotFoundTest() {
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        assertThrows(NotFoundException.class, () -> itemService.addComment(commentDto, 1L, 42L));
+    }
+
+    @Test
     void createItemUserNotFoundTest() {
         assertThrows(NotFoundException.class, () -> itemService.createItem(itemDto, 42L));
     }
@@ -237,4 +249,15 @@ public class ItemServiceImplTest {
         assertThrows(NotFoundException.class, () -> itemService.updateItem(1L, itemDto, anotherUser.getId()));
     }
 
+    @Test
+    void updateItemItemNotFoundTest() {
+        assertThrows(NotFoundException.class, () -> itemService.updateItem(42L, itemDto, 42L));
+    }
+
+    @Test
+    void updateItemUserNotFoundTest() {
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        assertThrows(NotFoundException.class, () -> itemService.updateItem(1L, itemDto, 42L));
+    }
 }

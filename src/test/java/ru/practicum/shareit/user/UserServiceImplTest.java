@@ -77,8 +77,8 @@ public class UserServiceImplTest {
 
     @Test
     void updateUserTest() {
-        UserDto userDtoUpdate = new UserDto(1L, "userName", "userUpdate@test.com");
-        User userUpdate = new User(1L, "userName", "userUpdate@test.com");
+        UserDto userDtoUpdate = new UserDto(1L, "userNameUpd", "userUpdate@test.com");
+        User userUpdate = new User(1L, "userNameUpd", "userUpdate@test.com");
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(userUpdate));
         when(userMapper.toUser(any()))
