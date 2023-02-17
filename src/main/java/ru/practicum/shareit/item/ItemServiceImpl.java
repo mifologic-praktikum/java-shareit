@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,8 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Can't be negative");
         }
         Pageable pageable = PageRequest.of((from / size), size);
-        for (Item item : itemRepository.findAll(pageable)) {
+        Page<Item> itemList = itemRepository.findAll(pageable);
+        for (Item item : itemList) {
             if (Objects.equals(item.getOwner().getId(), userId)) {
                 ItemDto itemDto = setItemBookings(itemMapper.toItemDto(item));
                 userItems.add(itemDto);
@@ -162,7 +164,7 @@ public class ItemServiceImpl implements ItemService {
         if (bookings.isEmpty()) {
             throw new UserHasNoBookings("User should have at least one active booking");
         }
-        if (commentDto.getText().isBlank() || commentDto.getText() == null) {
+        if (commentDto.getText() == null || commentDto.getText().isBlank()) {
             throw new ValidationException("Text can't be empty");
         }
         Comment comment = commentMapper.fromCommentDto(commentDto);

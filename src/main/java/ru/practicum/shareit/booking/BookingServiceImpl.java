@@ -135,7 +135,7 @@ public class BookingServiceImpl implements BookigService {
     }
 
     @Override
-    public List<BookingDto> findBookingByUser(Long userId, BookingState state, int from, int size) {
+    public List<BookingDto> findBookingsByUser(Long userId, BookingState state, int from, int size) {
         userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id=" + userId + " not found"));
         List<Booking> bookingList = new ArrayList<>();
@@ -164,8 +164,6 @@ public class BookingServiceImpl implements BookigService {
             case REJECTED:
                 bookingList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
                 break;
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
         }
         return bookingMapper.toListBookingDto(bookingList);
     }

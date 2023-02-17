@@ -3,13 +3,12 @@ package ru.practicum.shareit.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.ArrayList;
@@ -23,17 +22,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(UserController.class)
+@AutoConfigureMockMvc
 public class UserControllerTest {
 
-    @Mock
+    @MockBean
     UserService userService;
-
-    @InjectMocks
-    UserController userController;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mvc;
 
     private UserDto userDto;
@@ -41,9 +39,6 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(userController)
-                .build();
 
         userDto = new UserDto(1L, "userName", "user@test.com");
         updateUser = new UserDto(1L, "userName", "updateUser@test.com");
@@ -54,7 +49,7 @@ public class UserControllerTest {
         when(userService.createUser(any()))
                 .thenReturn(userDto);
 
-        mvc.perform(post("/users")
+        mvc.perform(post("/users/")
                         .header("X-Sharer-User-Id", 1L)
                         .content(mapper.writeValueAsString(userDto))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -62,6 +57,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+        verify(userService, times(1))
+                .createUser(any());
     }
 
     @Test
@@ -75,6 +72,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+        verify(userService, times(1))
+                .findUserById(1L);
     }
 
     @Test
@@ -85,6 +84,8 @@ public class UserControllerTest {
                         .header("X-Sharer-User-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        verify(userService, times(1))
+                .findAllUsers();
     }
 
     @Test
@@ -94,11 +95,14 @@ public class UserControllerTest {
         mvc.perform(patch("/users/1")
                 .header("X-Sharer-User-Id", 1L)
                 .content(mapper.writeValueAsString(updateUser))
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(updateUser.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(updateUser.getName())))
                 .andExpect(jsonPath("$.email", is(updateUser.getEmail())));
+        verify(userService, times(1))
+                .updateUser(anyLong(), any());
     }
 
     @Test

@@ -3,16 +3,14 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.item.comments.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,34 +23,27 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ItemController.class)
+@AutoConfigureMockMvc
 public class ItemControllerTest {
 
-    @Mock
+    @MockBean
     ItemService itemService;
-    @Mock
+    @MockBean
     ItemMapper itemMapper;
 
-    @InjectMocks
-    ItemController itemController;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mvc;
 
     private ItemDto itemDto;
     private ItemDto updateItem;
     private CommentDto commentDto;
 
-    private User user;
-
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(itemController)
-                .build();
-
-        user = new User(1L, "userName", "user@test.com");
         itemDto = new ItemDto(1L, "Шуруповёрт Makita", "Надёжный шуруповёрт", true,
                 null, null, null, 1L);
         updateItem = new ItemDto(1L, "Шуруповёрт Makita", "Очень надёжный шуруповёрт", true,

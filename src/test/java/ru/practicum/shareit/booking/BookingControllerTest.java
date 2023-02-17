@@ -3,15 +3,12 @@ package ru.practicum.shareit.booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
@@ -24,18 +21,18 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+
+@WebMvcTest(BookingController.class)
+@AutoConfigureMockMvc
 public class BookingControllerTest {
 
-    @Mock
+    @MockBean
     BookigService bookigService;
 
-    @InjectMocks
-    BookingController bookingController;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mvc;
 
     private BookingDto bookingDto;
@@ -43,10 +40,6 @@ public class BookingControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(bookingController)
-                .build();
-
         bookingDto = new BookingDto(1L, null, null,
                 new BookingDto.Item(1L, "секатор садовый"), new BookingDto.User(1L),
                 BookingStatus.APPROVED);
@@ -93,12 +86,24 @@ public class BookingControllerTest {
 
     @Test
     void findBookingByUserTest() throws Exception {
-        when(bookigService.findBookingByUser(anyLong(), any(), anyInt(), anyInt()))
+        when(bookigService.findBookingsByUser(anyLong(), any(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(bookingDto));
-        mvc.perform(get("/bookings/owner")
-                .header("X-Sharer-User-Id", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 1L)
+                        .param("state", "ALL")
+                        .param("from", "0")
+                        .param("size", "0")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void findBookingByOwnerTest() throws Exception {
+        when(bookigService.findBookingsByOwner(anyLong(), any(), anyInt(), anyInt()))
+                .thenReturn(Collections.singletonList(bookingDto));
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }

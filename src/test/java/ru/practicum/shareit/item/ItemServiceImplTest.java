@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -37,7 +36,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@AutoConfigureMockMvc
 public class ItemServiceImplTest {
 
     private ItemServiceImpl itemService;
@@ -75,7 +74,7 @@ public class ItemServiceImplTest {
         itemService = new ItemServiceImpl(itemRepository, userRepository, bookingRepository, commentRepository, itemRequestRepository, itemMapper, commentMapper);
         user = new User(1L, "userName", "user@test.com");
         itemRequest = new ItemRequest(1L, "газовая горелка", LocalDateTime.now(), user);
-        item = new Item(1L, "газовая горелка", "подойдёт для всех видов работ", true, user, itemRequest);
+        item = new Item(1L, "газовая горелка", "Подойдёт для всех видов работ", true, user, itemRequest);
         itemDto = new ItemDto(1L, "газовая горелка", "подойдёт для всех видов работ", true, null, null, null, null);
         booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now(), item, user, BookingStatus.APPROVED);
         commentDto = new CommentDto(1L, "test comment", item.getName(), LocalDateTime.now());
@@ -87,10 +86,10 @@ public class ItemServiceImplTest {
         when(itemMapper.toItemDto(any()))
                 .thenReturn(itemDto);
         final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
-        when(itemRepository.findAll(PageRequest.of(0, 10)))
+        when(itemRepository.findAll(PageRequest.of((0 / 10), 10)))
                 .thenReturn(itemPage);
-        itemService.findAllItems(1L, 0, 10);
-        verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
+        assertNotNull(itemService.findAllItems(1L, 0, 10));
+        verify(itemRepository, times(1)).findAll(PageRequest.of((0 / 10), 10));
     }
 
     @Test
@@ -101,7 +100,7 @@ public class ItemServiceImplTest {
                 .thenReturn(Optional.ofNullable(item));
         when(commentRepository.findAllByItemId(anyLong()))
                 .thenReturn(Collections.singletonList(comment));
-        itemService.findItemById(1L, 1L);
+        assertNotNull(itemService.findItemById(1L, 1L));
         verify(itemRepository, times(1)).findById(item.getId());
     }
 
@@ -110,10 +109,10 @@ public class ItemServiceImplTest {
         when(itemMapper.toListItemDto(anyList()))
                 .thenReturn(Collections.singletonList(itemDto));
         final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
-        when(itemRepository.findAll(PageRequest.of(0, 10)))
+        when(itemRepository.findAll(PageRequest.of((0 / 10), 10)))
                 .thenReturn(itemPage);
         assertNotNull(itemService.searchItems("газовая горелка", 0, 10));
-        verify(itemRepository, times(1)).findAll(PageRequest.of(0, 10));
+        verify(itemRepository, times(1)).findAll(PageRequest.of((0 / 10), 10));
     }
 
     @Test
@@ -170,8 +169,6 @@ public class ItemServiceImplTest {
 
     @Test
     void addCommentUserHasNoBookingTest() {
-        when(commentMapper.fromCommentDto(any()))
-                .thenReturn(comment);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
@@ -181,9 +178,19 @@ public class ItemServiceImplTest {
 
     @Test
     void addCommentCommentDtoTextIsEmptyTest() {
+        CommentDto commentDtoEmptyText = new CommentDto(1L, null, item.getName(), LocalDateTime.now());
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(bookingRepository.findAllByItemAndBookerIdAndStatusAndEndBefore(any(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(booking));
+        assertThrows(ValidationException.class, () -> itemService.addComment(commentDtoEmptyText, 1L, 1L));
+    }
+
+    @Test
+    void addCommentCommentDtoTextIsBlankTest() {
         CommentDto commentDtoEmptyText = new CommentDto(1L, "", item.getName(), LocalDateTime.now());
-        when(commentMapper.fromCommentDto(any()))
-                .thenReturn(comment);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
@@ -226,16 +233,44 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void updateItemTest() {
+    void updateItemDescriptionTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
-        ItemDto updateItem = new ItemDto(1L, "газовая горелка update", "подойдёт для всех видов работ", true, null, null, null, null);
+        ItemDto updateItem = new ItemDto(1L, null, "подойдёт для всех видов работ", null, null, null, null, null);
         when(itemMapper.toItemDto(any()))
                 .thenReturn(updateItem);
-        ItemDto result = itemService.updateItem(1L, itemDto, 1L);
+        ItemDto result = itemService.updateItem(1L, updateItem, 1L);
+        assertEquals("подойдёт для всех видов работ", result.getDescription());
+        verify(itemRepository, times(1)).save(item);
+    }
+
+    @Test
+    void updateItemNameTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        ItemDto updateItem = new ItemDto(1L, "газовая горелка update", null, null, null, null, null, null);
+        when(itemMapper.toItemDto(any()))
+                .thenReturn(updateItem);
+        ItemDto result = itemService.updateItem(1L, updateItem, 1L);
         assertEquals("газовая горелка update", result.getName());
+        verify(itemRepository, times(1)).save(item);
+    }
+
+    @Test
+    void updateItemAvailableTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        ItemDto updateItem = new ItemDto(1L, null, null, true, null, null, null, null);
+        when(itemMapper.toItemDto(any()))
+                .thenReturn(updateItem);
+        ItemDto result = itemService.updateItem(1L, updateItem, 1L);
+        assertEquals(true, result.getAvailable());
         verify(itemRepository, times(1)).save(item);
     }
 

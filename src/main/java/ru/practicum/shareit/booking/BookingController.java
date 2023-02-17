@@ -47,7 +47,7 @@ public class BookingController {
                                               @RequestParam(name = "from", defaultValue = "0") int from,
                                               @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Find bookings by state=" + state);
-        return bookingService.findBookingByUser(userId, state, from, size);
+        return bookingService.findBookingsByUser(userId, state, from, size);
     }
 
     @GetMapping("/owner")

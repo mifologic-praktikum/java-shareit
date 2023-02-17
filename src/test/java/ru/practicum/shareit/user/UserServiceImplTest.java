@@ -76,9 +76,9 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void updateUserTest() {
-        UserDto userDtoUpdate = new UserDto(1L, "userNameUpd", "userUpdate@test.com");
-        User userUpdate = new User(1L, "userNameUpd", "userUpdate@test.com");
+    void updateUserEmailTest() {
+        UserDto userDtoUpdate = new UserDto(1L, null, "userUpdate@test.com");
+        User userUpdate = new User(1L, null, "userUpdate@test.com");
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(userUpdate));
         when(userMapper.toUser(any()))
@@ -88,6 +88,39 @@ public class UserServiceImplTest {
         UserDto update = userService.updateUser(1L, userDtoUpdate);
         assertEquals("userUpdate@test.com", update.getEmail());
         verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).save(userUpdate);
+    }
+
+    @Test
+    void updateUserNameTest() {
+        UserDto userDtoUpdate = new UserDto(1L, "userNameUpd", null);
+        User userUpdate = new User(1L, "userNameUpd", null);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userUpdate));
+        when(userMapper.toUser(any()))
+                .thenReturn(userUpdate);
+        when(userMapper.toUserDto(any()))
+                .thenReturn(userDtoUpdate);
+        UserDto update = userService.updateUser(1L, userDtoUpdate);
+        assertEquals("userNameUpd", update.getName());
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).save(userUpdate);
+    }
+
+    @Test
+    void updateUserEmptyNameTest() {
+        UserDto userDtoUpdate = new UserDto(1L, "userNameUpd", "userUpdate@test.com");
+        User userUpdate = new User(1L, "", "userUpdate@test.com");
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(userUpdate));
+        when(userMapper.toUser(any()))
+                .thenReturn(userUpdate);
+        when(userMapper.toUserDto(any()))
+                .thenReturn(userDtoUpdate);
+        UserDto update = userService.updateUser(1L, userDtoUpdate);
+        assertEquals("userUpdate@test.com", update.getEmail());
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).save(userUpdate);
     }
 
     @Test
