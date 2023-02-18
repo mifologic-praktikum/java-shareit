@@ -26,15 +26,13 @@ public class BookingServiceImpl implements BookigService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final BookingMapper bookingMapper;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
                               ItemRepository itemRepository,
-                              UserRepository userRepository, BookingMapper bookingMapper) {
+                              UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
-        this.bookingMapper = bookingMapper;
     }
 
 
@@ -53,7 +51,7 @@ public class BookingServiceImpl implements BookigService {
         if (!item.getAvailable()) {
             throw new BadRequestException("This item is unavailable for booking");
         }
-        Booking booking = bookingMapper.toBooking(newBookingDto, item, user);
+        Booking booking = BookingMapper.toBooking(newBookingDto, item, user);
         if (booking.getEnd().isBefore(booking.getStart())) {
             throw new BadRequestException("End date can't be before start date");
         }
@@ -64,7 +62,7 @@ public class BookingServiceImpl implements BookigService {
         booking.setItem(item);
         booking.setStatus(BookingStatus.WAITING);
         bookingRepository.save(booking);
-        return bookingMapper.toBookingDto(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
 
@@ -86,7 +84,7 @@ public class BookingServiceImpl implements BookigService {
             booking.setStatus(BookingStatus.REJECTED);
         }
         bookingRepository.save(booking);
-        return bookingMapper.toBookingDto(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class BookingServiceImpl implements BookigService {
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
             throw new NotFoundException("User with id=" + userId + " can't see information about this booking");
         }
-        return bookingMapper.toBookingDto(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -131,7 +129,7 @@ public class BookingServiceImpl implements BookigService {
                 bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
                 break;
         }
-        return bookingMapper.toListBookingDto(bookingList);
+        return BookingMapper.toListBookingDto(bookingList);
     }
 
     @Override
@@ -165,6 +163,6 @@ public class BookingServiceImpl implements BookigService {
                 bookingList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
                 break;
         }
-        return bookingMapper.toListBookingDto(bookingList);
+        return BookingMapper.toListBookingDto(bookingList);
     }
 }

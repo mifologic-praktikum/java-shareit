@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -11,10 +10,9 @@ import ru.practicum.shareit.user.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 public class BookingMapper {
 
-    public BookingDto toBookingDto(Booking booking) {
+    public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
                 booking.getId(),
                 booking.getStart(),
@@ -25,7 +23,7 @@ public class BookingMapper {
         );
     }
 
-    public Booking toBooking(NewBookingDto newBookingDto, Item item, User user) {
+    public static Booking toBooking(NewBookingDto newBookingDto, Item item, User user) {
         return new Booking(
                 newBookingDto.getId(),
                 newBookingDto.getStart(),
@@ -36,7 +34,7 @@ public class BookingMapper {
         );
     }
 
-    public List<BookingDto> toListBookingDto(List<Booking> bookingList) {
+    public static List<BookingDto> toListBookingDto(List<Booking> bookingList) {
         List<BookingDto> bookingDtos = new ArrayList<>();
         for (Booking booking : bookingList) {
             bookingDtos.add(toBookingDto(booking));

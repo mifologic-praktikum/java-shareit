@@ -12,31 +12,29 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userStorage, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userStorage) {
         this.userRepository = userStorage;
-        this.userMapper = userMapper;
     }
 
 
     @Override
     public List<UserDto> findAllUsers() {
-        return userMapper.toListUserDto(userRepository.findAll());
+        return UserMapper.toListUserDto(userRepository.findAll());
     }
 
     @Override
     public UserDto findUserById(Long userId) {
-        return userMapper.toUserDto(userRepository.findById(userId).orElseThrow(
+        return UserMapper.toUserDto(userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id= " + userId + " not found")));
     }
 
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
         userRepository.save(user);
-        return userMapper.toUserDto(user);
+        return UserMapper.toUserDto(user);
     }
 
     @Transactional
@@ -45,7 +43,7 @@ public class UserServiceImpl implements UserService {
         User userInStorage = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id= " + userId + " not found")
         );
-        User user = userMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
         if (user.getEmail() != null) {
             userInStorage.setEmail(user.getEmail());
         }
@@ -53,7 +51,7 @@ public class UserServiceImpl implements UserService {
             userInStorage.setName(user.getName());
         }
         userRepository.save(userInStorage);
-        return userMapper.toUserDto(userInStorage);
+        return UserMapper.toUserDto(userInStorage);
     }
 
     @Transactional

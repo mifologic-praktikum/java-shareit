@@ -39,17 +39,13 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
-    private final ItemMapper itemMapper;
-    private final CommentMapper commentMapper;
 
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository, ItemMapper itemMapper, CommentMapper commentMapper) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.itemRequestRepository = itemRequestRepository;
-        this.itemMapper = itemMapper;
-        this.commentMapper = commentMapper;
     }
 
 
@@ -63,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
         Page<Item> itemList = itemRepository.findAll(pageable);
         for (Item item : itemList) {
             if (Objects.equals(item.getOwner().getId(), userId)) {
-                ItemDto itemDto = setItemBookings(itemMapper.toItemDto(item));
+                ItemDto itemDto = setItemBookings(ItemMapper.toItemDto(item));
                 userItems.add(itemDto);
             }
         }
@@ -75,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Item with id= " + itemId + " not found")
         );
-        ItemDto itemDto = itemMapper.toItemDto(item);
+        ItemDto itemDto = ItemMapper.toItemDto(item);
         if (item.getOwner().getId().equals(userId)) {
             setItemBookings(itemDto);
         }
@@ -93,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Can't be negative");
         }
         Pageable pageable = PageRequest.of((from / size), size);
-        return itemMapper.toListItemDto(itemRepository.findAll(pageable).stream()
+        return ItemMapper.toListItemDto(itemRepository.findAll(pageable).stream()
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) ||
                         item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .filter(Item::getAvailable)
@@ -106,16 +102,16 @@ public class ItemServiceImpl implements ItemService {
         User owner = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id= " + userId + " not found")
         );
-        Item item = itemMapper.toItem(itemDto, owner);
+        Item item = ItemMapper.toItem(itemDto, owner);
         item.setOwner(owner);
         if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElse(new ItemRequest());
             item.setItemRequest(itemRequest);
             Item itemToRepositoryWithRequest = itemRepository.save(item);
-            return itemMapper.toItemDtoWithRequest(itemToRepositoryWithRequest);
+            return ItemMapper.toItemDtoWithRequest(itemToRepositoryWithRequest);
         }
         Item itemToRepository = itemRepository.save(item);
-        return itemMapper.toItemDto(itemToRepository);
+        return ItemMapper.toItemDto(itemToRepository);
     }
 
     @Transactional
@@ -138,7 +134,7 @@ public class ItemServiceImpl implements ItemService {
                 itemInStorage.setAvailable(itemDto.getAvailable());
             }
             itemRepository.save(itemInStorage);
-            return itemMapper.toItemDto(itemInStorage);
+            return ItemMapper.toItemDto(itemInStorage);
         } else {
             throw new NotFoundException("This user can't update this item");
         }
@@ -167,12 +163,12 @@ public class ItemServiceImpl implements ItemService {
         if (commentDto.getText() == null || commentDto.getText().isBlank()) {
             throw new ValidationException("Text can't be empty");
         }
-        Comment comment = commentMapper.fromCommentDto(commentDto);
+        Comment comment = CommentMapper.fromCommentDto(commentDto);
         comment.setCreated(LocalDateTime.now());
         comment.setItem(item);
         comment.setAuthor(user);
         commentRepository.save(comment);
-        return commentMapper.toCommentDto(comment);
+        return CommentMapper.toCommentDto(comment);
     }
 
     private ItemDto setItemBookings(ItemDto itemDto) {

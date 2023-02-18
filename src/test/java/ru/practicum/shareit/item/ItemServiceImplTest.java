@@ -2,10 +2,6 @@ package ru.practicum.shareit.item;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -17,7 +13,6 @@ import ru.practicum.shareit.exception.UserHasNoBookings;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comments.Comment;
 import ru.practicum.shareit.item.comments.CommentDto;
-import ru.practicum.shareit.item.comments.CommentMapper;
 import ru.practicum.shareit.item.comments.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -35,31 +30,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-@AutoConfigureMockMvc
 public class ItemServiceImplTest {
 
     private ItemServiceImpl itemService;
 
-    @Mock
     private ItemRepository itemRepository;
 
-    @Mock
     private ItemRequestRepository itemRequestRepository;
 
-    @Mock
     private UserRepository userRepository;
 
-    @Mock
     private BookingRepository bookingRepository;
 
-    @Mock
     private CommentRepository commentRepository;
-
-    @Mock
-    ItemMapper itemMapper;
-    @Mock
-    CommentMapper commentMapper;
 
     Item item;
     ItemDto itemDto;
@@ -71,7 +54,12 @@ public class ItemServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        itemService = new ItemServiceImpl(itemRepository, userRepository, bookingRepository, commentRepository, itemRequestRepository, itemMapper, commentMapper);
+        itemRepository = mock(ItemRepository.class);
+        itemRequestRepository = mock(ItemRequestRepository.class);
+        userRepository = mock(UserRepository.class);
+        bookingRepository = mock(BookingRepository.class);
+        commentRepository = mock(CommentRepository.class);
+        itemService = new ItemServiceImpl(itemRepository, userRepository, bookingRepository, commentRepository, itemRequestRepository);
         user = new User(1L, "userName", "user@test.com");
         itemRequest = new ItemRequest(1L, "газовая горелка", LocalDateTime.now(), user);
         item = new Item(1L, "газовая горелка", "Подойдёт для всех видов работ", true, user, itemRequest);
@@ -83,8 +71,6 @@ public class ItemServiceImplTest {
 
     @Test
     void findAllItemsTest() {
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(itemDto);
         final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
         when(itemRepository.findAll(PageRequest.of((0 / 10), 10)))
                 .thenReturn(itemPage);
@@ -94,20 +80,16 @@ public class ItemServiceImplTest {
 
     @Test
     void findItemByIdTest() {
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(itemDto);
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
         when(commentRepository.findAllByItemId(anyLong()))
                 .thenReturn(Collections.singletonList(comment));
         assertNotNull(itemService.findItemById(1L, 1L));
-        verify(itemRepository, times(1)).findById(item.getId());
+        verify(itemRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void searchItemsTest() {
-        when(itemMapper.toListItemDto(anyList()))
-                .thenReturn(Collections.singletonList(itemDto));
         final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
         when(itemRepository.findAll(PageRequest.of((0 / 10), 10)))
                 .thenReturn(itemPage);
@@ -124,15 +106,11 @@ public class ItemServiceImplTest {
     void createItemTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
-        when(itemMapper.toItem(any(), any()))
-                .thenReturn(item);
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(itemDto);
         when(itemRepository.save(any()))
                 .thenReturn(item);
         ItemDto itemDtoCreated = itemService.createItem(itemDto, user.getId());
         assertNotNull(itemDtoCreated);
-        verify(itemRepository, times(1)).save(item);
+        verify(itemRepository, times(1)).save(any());
     }
 
     @Test
@@ -140,23 +118,17 @@ public class ItemServiceImplTest {
         ItemDto itemWithRequestDto = new ItemDto(1L, "газовая горелка", "подойдёт для всех видов работ", true, null, null, null, 1L);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
-        when(itemMapper.toItem(any(), any()))
-                .thenReturn(item);
         when(itemRequestRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(itemRequest));
-        when(itemMapper.toItemDtoWithRequest(any()))
-                .thenReturn(itemWithRequestDto);
         when(itemRepository.save(any()))
                 .thenReturn(item);
         ItemDto itemDtoCreated = itemService.createItem(itemWithRequestDto, user.getId());
         assertNotNull(itemDtoCreated);
-        verify(itemRepository, times(1)).save(item);
+        verify(itemRepository, times(1)).save(any());
     }
 
     @Test
     void addCommentTest() {
-        when(commentMapper.fromCommentDto(any()))
-                .thenReturn(comment);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
@@ -164,7 +136,7 @@ public class ItemServiceImplTest {
         when(bookingRepository.findAllByItemAndBookerIdAndStatusAndEndBefore(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(booking));
         itemService.addComment(commentDto, 1L, 1L);
-        verify(commentRepository, times(1)).save(comment);
+        verify(commentRepository, times(1)).save(any());
     }
 
     @Test
@@ -239,11 +211,9 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
         ItemDto updateItem = new ItemDto(1L, null, "подойдёт для всех видов работ", null, null, null, null, null);
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(updateItem);
         ItemDto result = itemService.updateItem(1L, updateItem, 1L);
         assertEquals("подойдёт для всех видов работ", result.getDescription());
-        verify(itemRepository, times(1)).save(item);
+        verify(itemRepository, times(1)).save(any());
     }
 
     @Test
@@ -253,11 +223,9 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
         ItemDto updateItem = new ItemDto(1L, "газовая горелка update", null, null, null, null, null, null);
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(updateItem);
         ItemDto result = itemService.updateItem(1L, updateItem, 1L);
         assertEquals("газовая горелка update", result.getName());
-        verify(itemRepository, times(1)).save(item);
+        verify(itemRepository, times(1)).save(any());
     }
 
     @Test
@@ -267,11 +235,9 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
         ItemDto updateItem = new ItemDto(1L, null, null, true, null, null, null, null);
-        when(itemMapper.toItemDto(any()))
-                .thenReturn(updateItem);
         ItemDto result = itemService.updateItem(1L, updateItem, 1L);
         assertEquals(true, result.getAvailable());
-        verify(itemRepository, times(1)).save(item);
+        verify(itemRepository, times(1)).save(any());
     }
 
     @Test

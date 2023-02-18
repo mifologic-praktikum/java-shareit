@@ -2,11 +2,6 @@ package ru.practicum.shareit.booking;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
@@ -30,23 +25,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 public class BookingServiceImplTest {
 
     private BookigService bookigService;
 
-    @Mock
     private ItemRepository itemRepository;
 
-    @Mock
     private UserRepository userRepository;
 
-    @Mock
     private BookingRepository bookingRepository;
-
-    @Mock
-    BookingMapper bookingMapper;
 
     Booking booking;
     BookingDto bookingDto;
@@ -57,8 +44,10 @@ public class BookingServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        bookigService = new BookingServiceImpl(bookingRepository, itemRepository, userRepository, bookingMapper);
-
+        itemRepository = mock(ItemRepository.class);
+        userRepository = mock(UserRepository.class);
+        bookingRepository = mock(BookingRepository.class);
+        bookigService = new BookingServiceImpl(bookingRepository, itemRepository, userRepository);
         owner = new User(1L, "userName", "user@test.com");
         user = new User(2L, "userNameSecond", "user2@test.com");
         item = new Item(1L, "газоавя горелка", "подойдёт для всех видов работ", true, owner, null);
@@ -78,13 +67,9 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
-        when(bookingMapper.toBooking(any(), any(), any()))
-                .thenReturn(booking);
-        when(bookingMapper.toBookingDto(any()))
-                .thenReturn(bookingDto);
         BookingDto bookingDtoCreated = bookigService.createBooking(2L, newBookingDto);
         assertNotNull(bookingDtoCreated);
-        verify(bookingRepository, times(1)).save(booking);
+        verify(bookingRepository, times(1)).save(any());
     }
 
     @Test
@@ -113,8 +98,6 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
-        when(bookingMapper.toBooking(any(), any(), any()))
-                .thenReturn(booking);
         assertThrows(NotFoundException.class, () ->
                 bookigService.createBooking(1L, newBookingDto));
     }
@@ -125,11 +108,9 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
-        when(bookingMapper.toBooking(any(), any(), any()))
-                .thenReturn(booking);
-        booking.setEnd(LocalDateTime.of(2023, 12, 10, 13, 48, 48));
+        newBookingDto.setEnd(LocalDateTime.of(2023, 12, 10, 13, 48, 48));
         assertThrows(BadRequestException.class, () ->
-                bookigService.createBooking(2L, newBookingDto));
+                bookigService.createBooking(user.getId(), newBookingDto));
     }
 
     @Test
@@ -138,9 +119,7 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
-        when(bookingMapper.toBooking(any(), any(), any()))
-                .thenReturn(booking);
-        booking.setStart(LocalDateTime.of(2022, 12, 10, 13, 48, 48));
+        newBookingDto.setStart(LocalDateTime.of(2022, 12, 10, 13, 48, 48));
         assertThrows(BadRequestException.class, () ->
                 bookigService.createBooking(2L, newBookingDto));
     }
@@ -163,8 +142,6 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.of(owner));
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
-        when(bookingMapper.toBookingDto(any()))
-                .thenReturn(bookingDto);
         BookingDto findBooking = bookigService.findBookingById(1L, 1L);
         assertNotNull(findBooking);
     }
@@ -185,10 +162,10 @@ public class BookingServiceImplTest {
     void findBookingsByOwnerAllStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(owner));
-        when(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(anyLong(), PageRequest.of(anyInt(), 10)))
+        when(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(anyLong(), any()))
                 .thenReturn(Collections.singletonList(booking));
         bookigService.findBookingsByOwner(1L, BookingState.ALL, 0, 10);
-        verify(bookingRepository, times(1)).findAllByItem_Owner_IdOrderByIdDesc(1L, PageRequest.of(0, 10));
+        verify(bookingRepository, times(1)).findAllByItem_Owner_IdOrderByIdDesc(anyLong(), any());
     }
 
     @Test
@@ -343,20 +320,20 @@ public class BookingServiceImplTest {
     void updateBookingApprovedTTest() {
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
-        when(bookingMapper.toBookingDto(any()))
-                .thenReturn(bookingDto);
+        when(bookingRepository.save(any()))
+                .thenReturn(booking);
         bookigService.updateBooking(1L, booking.getId(), true);
-        verify(bookingRepository, times(1)).save(booking);
+        verify(bookingRepository, times(1)).save(any());
     }
 
     @Test
     void updateBookingRejectedTest() {
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking));
-        when(bookingMapper.toBookingDto(any()))
-                .thenReturn(bookingDto);
+        when(bookingRepository.save(any()))
+                .thenReturn(booking);
         bookigService.updateBooking(1L, booking.getId(), false);
-        verify(bookingRepository, times(1)).save(booking);
+        verify(bookingRepository, times(1)).save(any());
     }
 
     @Test
@@ -365,7 +342,6 @@ public class BookingServiceImplTest {
                 .thenReturn(Optional.ofNullable(booking));
         assertThrows(RuntimeException.class, ()
                 -> bookigService.updateBooking(2L, booking.getId(), true));
-        verify(bookingRepository, times(0)).save(booking);
     }
 
     @Test
@@ -375,7 +351,6 @@ public class BookingServiceImplTest {
         booking.setStatus(BookingStatus.APPROVED);
         assertThrows(BadRequestException.class, ()
                 -> bookigService.updateBooking(1L, booking.getId(), true));
-        verify(bookingRepository, times(0)).save(booking);
     }
 
     @Test

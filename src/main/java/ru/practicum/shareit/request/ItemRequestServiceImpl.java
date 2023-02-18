@@ -25,13 +25,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public final ItemRequestRepository itemRequestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final ItemRequestMapper itemRequestMapper;
 
-    public ItemRequestServiceImpl(ItemRequestRepository itemRequestRepository, ItemRepository itemRepository, UserRepository userRepository, ItemRequestMapper itemRequestMapper) {
+      public ItemRequestServiceImpl(ItemRequestRepository itemRequestRepository, ItemRepository itemRepository, UserRepository userRepository) {
         this.itemRequestRepository = itemRequestRepository;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
-        this.itemRequestMapper = itemRequestMapper;
     }
 
     @Transactional
@@ -40,10 +38,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         User requester = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id= " + userId + " not found")
         );
-        ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestDto, requester);
+        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requester);
         itemRequest.setRequester(requester);
         itemRequestRepository.save(itemRequest);
-        return itemRequestMapper.toItemRequestDto(itemRequest);
+        return ItemRequestMapper.toItemRequestDto(itemRequest);
     }
 
     @Override
@@ -54,7 +52,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = itemRequestRepository.findById(requestId).orElseThrow(
                 () -> new NotFoundException("Item with id=" + requestId + " not found"));
         List<ItemRequestDto.ItemDto> itemDto = addItems(requestId);
-        ItemRequestDto itemRequestDto = itemRequestMapper.toItemRequestDto(itemRequest);
+        ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest);
         itemRequestDto.setItems(itemDto);
         return itemRequestDto;
     }
@@ -68,8 +66,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> itemRequestsWithItems = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             List<ItemRequestDto.ItemDto> itemDto = addItems(itemRequest.getId());
-            System.out.println(itemRequest.toString());
-            ItemRequestDto itemRequestDto = itemRequestMapper.toItemRequestDto(itemRequest);
+            ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest);
             itemRequestDto.setItems(itemDto);
             itemRequestsWithItems.add(itemRequestDto);
         }
@@ -89,7 +86,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> itemRequestsWithItems = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             List<ItemRequestDto.ItemDto> itemDto = addItems(itemRequest.getId());
-            ItemRequestDto itemRequestDto = itemRequestMapper.toItemRequestDto(itemRequest);
+            ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest);
             itemRequestDto.setItems(itemDto);
             itemRequestsWithItems.add(itemRequestDto);
         }

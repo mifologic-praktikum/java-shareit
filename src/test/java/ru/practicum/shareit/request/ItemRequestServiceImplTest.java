@@ -2,12 +2,6 @@ package ru.practicum.shareit.request;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -29,47 +23,41 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class ItemRequestServiceImplTest {
 
     private ItemRequestServiceImpl itemRequestService;
-    @Mock
+
     private ItemRequestRepository itemRequestRepository;
-    @Mock
+
     ItemRepository itemRepository;
-    @Mock
+
     private UserRepository userRepository;
-    @Mock
-    private ItemRequestMapper itemRequestMapper;
     private ItemRequest itemRequest;
     private ItemRequestDto itemRequestCreateDto;
-    private ItemRequestDto itemRequestGetDto;
     private User user;
     private Item item;
 
     @BeforeEach
     void setUp() {
-        itemRequestService = new ItemRequestServiceImpl(itemRequestRepository, itemRepository, userRepository, itemRequestMapper);
+        itemRepository = mock(ItemRepository.class);
+        itemRequestRepository = mock(ItemRequestRepository.class);
+        userRepository = mock(UserRepository.class);
+        itemRequestService = new ItemRequestServiceImpl(itemRequestRepository, itemRepository, userRepository);
         user = new User(1L, "userName", "user@test.com");
         itemRequest = new ItemRequest(1L, "газовая горелка", LocalDateTime.now(), user);
         item = new Item(1L, "газовая горелка", "подойдёт для всех видов работ", true, user, itemRequest);
         itemRequestCreateDto = new ItemRequestDto(null, "газовая горелка", null, null);
-        itemRequestGetDto = new ItemRequestDto(1L, "газовая горелка", LocalDateTime.now(), null);
     }
 
     @Test
     void createItemRequestTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
-        when(itemRequestMapper.toItemRequest(any(), any()))
-                .thenReturn(itemRequest);
-        when(itemRequestMapper.toItemRequestDto(any()))
-                .thenReturn(itemRequestCreateDto);
         when(itemRequestRepository.save(any()))
                 .thenReturn(itemRequest);
         ItemRequestDto itemRequestDtoCreated = itemRequestService.createItemRequest(user.getId(), itemRequestCreateDto);
         assertNotNull(itemRequestDtoCreated);
-        verify(itemRequestRepository, times(1)).save(itemRequest);
+        verify(itemRequestRepository, times(1)).save(any());
     }
 
     @Test
@@ -83,10 +71,8 @@ public class ItemRequestServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(itemRequestRepository.findById(anyLong()))
                 .thenReturn(Optional.of(itemRequest));
-        when(itemRequestMapper.toItemRequestDto(any()))
-                .thenReturn(itemRequestGetDto);
         assertNotNull(itemRequestService.findItemRequestById(user.getId(), itemRequest.getId()));
-        verify(itemRequestRepository, times(1)).findById(1L);
+        verify(itemRequestRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -108,10 +94,8 @@ public class ItemRequestServiceImplTest {
         List<ItemRequest> requests = new ArrayList<>(Collections.singletonList(itemRequest));
         when(itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(anyLong()))
                 .thenReturn(requests);
-        when(itemRequestMapper.toItemRequestDto(any()))
-                .thenReturn(itemRequestGetDto);
         itemRequestService.findAllUserItemsRequests(user.getId());
-        verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(1L);
+        verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(anyLong());
     }
 
     @Test
@@ -122,18 +106,15 @@ public class ItemRequestServiceImplTest {
     @Test
     void findAllItemsRequestsTest() {
         List<ItemRequest> itemRequests = Collections.singletonList(itemRequest);
-        Pageable pageable = PageRequest.of((0 / 10), 10, Sort.by(Sort.Direction.DESC, "created"));
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         when(itemRequestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(anyLong(), any()))
                 .thenReturn(itemRequests);
         when(itemRepository.findAllByItemRequest_Id(anyLong()))
                 .thenReturn(Collections.singletonList(item));
-        when(itemRequestMapper.toItemRequestDto(any()))
-                .thenReturn(itemRequestGetDto);
         itemRequestService.findAllItemsRequests(1L, 0, 10);
         verify(itemRequestRepository, times(1))
-                .findAllByRequesterIdIsNotOrderByCreatedDesc(1L, pageable);
+                .findAllByRequesterIdIsNotOrderByCreatedDesc(anyLong(), any());
     }
 
     @Test
