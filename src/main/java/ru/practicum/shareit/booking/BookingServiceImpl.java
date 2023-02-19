@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -97,63 +99,70 @@ public class BookingServiceImpl implements BookigService {
     }
 
     @Override
-    public List<BookingDto> findBookingByUser(Long userId, BookingState state) {
+    public List<BookingDto> findBookingsByOwner(Long userId, BookingState state, int from, int size) {
         userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id=" + userId + " not found"));
         List<Booking> bookingList = new ArrayList<>();
+        if (from < 0) {
+            throw new BadRequestException("Can't be negative");
+        }
+        Pageable pageable = PageRequest.of((from / size), size);
         switch (state) {
             case ALL:
-                bookingList.addAll(bookingRepository.findAllByBooker_IdOrderByIdDesc(userId));
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(userId, pageable));
                 break;
             case CURRENT:
-                bookingList.addAll(bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now()));
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), pageable));
                 break;
             case FUTURE:
-                bookingList.addAll(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(
+                        userId, LocalDateTime.now(), pageable));
                 break;
             case PAST:
-                bookingList.addAll(bookingRepository.findAllByBooker_IdAndEndBefore(userId, LocalDateTime.now()));
+                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndEndBefore(userId, LocalDateTime.now(), pageable));
                 break;
             case WAITING:
-                bookingList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING));
+                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageable));
                 break;
             case REJECTED:
-                bookingList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED));
+                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
                 break;
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
         }
         return BookingMapper.toListBookingDto(bookingList);
     }
 
     @Override
-    public List<BookingDto> findBookingsByOwner(Long userId, BookingState state) {
+    public List<BookingDto> findBookingsByUser(Long userId, BookingState state, int from, int size) {
         userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id=" + userId + " not found"));
         List<Booking> bookingList = new ArrayList<>();
+        if (from < 0) {
+            throw new BadRequestException("Can't be negative");
+        }
+        Pageable pageable = PageRequest.of((from / size), size);
         switch (state) {
             case ALL:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdOrderByIdDesc(userId));
+                bookingList.addAll(bookingRepository.findAllByBooker_IdOrderByIdDesc(userId, pageable));
                 break;
             case CURRENT:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now()));
+                bookingList.addAll(bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), pageable));
                 break;
             case FUTURE:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                bookingList.addAll(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(
+                        userId, LocalDateTime.now(), pageable));
                 break;
             case PAST:
-                bookingList.addAll(bookingRepository.findAllByItem_Owner_IdAndEndBefore(userId, LocalDateTime.now()));
+                bookingList.addAll(bookingRepository.findAllByBooker_IdAndEndBefore(userId, LocalDateTime.now(), pageable));
                 break;
             case WAITING:
-                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING));
+                bookingList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING, pageable));
                 break;
             case REJECTED:
-                bookingList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED));
+                bookingList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable));
                 break;
         }
-
         return BookingMapper.toListBookingDto(bookingList);
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.comments;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class CommentMapper {
                 .build();
     }
 
-    public static List<CommentDto> toListCommentDto(List<Comment> comments) {
+    public List<CommentDto> toListCommentDto(List<Comment> comments) {
         List<CommentDto> commentDtos = new ArrayList<>();
         for (Comment comment : comments) {
             commentDtos.add(toCommentDto(comment));
