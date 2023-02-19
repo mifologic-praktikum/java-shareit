@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ItemRequestServiceImpl implements ItemRequestService {
 
-    public final ItemRequestRepository itemRequestRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 

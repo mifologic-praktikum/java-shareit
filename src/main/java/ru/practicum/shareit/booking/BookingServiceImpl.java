@@ -104,7 +104,7 @@ public class BookingServiceImpl implements BookigService {
                 () -> new NotFoundException("User with id=" + userId + " not found"));
         List<Booking> bookingList = new ArrayList<>();
         if (from < 0) {
-            throw new BadRequestException("Can't be negative");
+            throw new BadRequestException("First element index can't be negative");
         }
         Pageable pageable = PageRequest.of((from / size), size);
         switch (state) {

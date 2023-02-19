@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BookingControllerTest {
 
     @MockBean
-    BookigService bookigService;
+    private BookigService bookigService;
 
 
     private final ObjectMapper mapper = new ObjectMapper();
