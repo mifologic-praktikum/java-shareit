@@ -45,7 +45,7 @@ public class BookingController {
 
 	@GetMapping("/owner")
 	public ResponseEntity<Object> findBookingByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-	@RequestParam(name = "state", defaultValue = "all") String stateParam,
+	@RequestParam(name = "state", defaultValue = "ALL") String stateParam,
 	@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 	@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
 		BookingState state = BookingState.from(stateParam)
@@ -56,7 +56,7 @@ public class BookingController {
 
 	@GetMapping
 	public ResponseEntity<Object> findBookingByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-													@RequestParam(name = "state", defaultValue = "all") String stateParam,
+													@RequestParam(name = "state", defaultValue = "ALL") String stateParam,
 													@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 													@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
 		BookingState state = BookingState.from(stateParam)

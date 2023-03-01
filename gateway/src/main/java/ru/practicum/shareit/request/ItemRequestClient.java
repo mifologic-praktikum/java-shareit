@@ -36,7 +36,7 @@ public class ItemRequestClient extends BaseClient {
     }
 
     ResponseEntity<Object> findAllUserItemsRequests(Long userId) {
-        return get("/", userId);
+        return get("?from={from}&size={size}", userId);
     }
 
     ResponseEntity<Object> findAllItemsRequests(Long userId, Integer from, Integer size) {
@@ -44,6 +44,6 @@ public class ItemRequestClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("all/?state={state}&from={from}&size={size}", userId, parameters);
+        return get("/all", userId, parameters);
     }
 }
