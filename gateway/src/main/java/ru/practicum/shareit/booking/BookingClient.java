@@ -32,7 +32,7 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> updateBooking(Long userId, Long bookingId, Boolean approved) {
-        return patch("/" + bookingId, userId, approved);
+        return patch("/" + bookingId + "?approved={approved}", userId, approved);
     }
 
     public ResponseEntity<Object> findBookingById(Long userId, Long bookingId) {
