@@ -62,6 +62,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id= " + userId + " not found")
         );
+        if (from < 0) {
+            throw new BadRequestException("Can't be negative");
+        }
+        if (size <= 0) {
+            throw new BadRequestException("Can't be 0 or negative");
+        }
         Pageable pageable = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "created"));
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
         List<ItemRequestDto> itemRequestsWithItems = new ArrayList<>();
