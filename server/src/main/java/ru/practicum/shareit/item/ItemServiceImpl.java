@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -55,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
         if (from < 0) {
             throw new BadRequestException("Can't be negative");
         }
-        Pageable pageable = PageRequest.of((from / size), size);
+        Pageable pageable = PageRequest.of((from / size), size, Sort.by(Sort.Direction.ASC, "id"));
         Page<Item> itemList = itemRepository.findAll(pageable);
         for (Item item : itemList) {
             if (Objects.equals(item.getOwner().getId(), userId)) {

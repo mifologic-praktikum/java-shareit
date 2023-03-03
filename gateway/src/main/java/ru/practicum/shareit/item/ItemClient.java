@@ -33,7 +33,7 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("/", userId, parameters);
+        return get("?from={from}&size={size}", userId, parameters);
     }
 
     ResponseEntity<Object> findItemById(Long userId, Long itemId) {
