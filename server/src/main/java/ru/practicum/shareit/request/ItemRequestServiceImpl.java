@@ -58,11 +58,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> findAllUserItemsRequests(Long userId) {
+    public List<ItemRequestDto> findAllUserItemsRequests(Long userId, int from, int size) {
         userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User with id= " + userId + " not found")
         );
-        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(userId);
+        Pageable pageable = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "created"));
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
         List<ItemRequestDto> itemRequestsWithItems = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             List<ItemRequestDto.ItemDto> itemDto = addItems(itemRequest.getId());

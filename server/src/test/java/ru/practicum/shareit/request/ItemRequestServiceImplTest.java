@@ -92,15 +92,15 @@ public class ItemRequestServiceImplTest {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
         List<ItemRequest> requests = new ArrayList<>(Collections.singletonList(itemRequest));
-        when(itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(anyLong()))
+        when(itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(anyLong(), any()))
                 .thenReturn(requests);
-        itemRequestService.findAllUserItemsRequests(user.getId());
-        verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(anyLong());
+        itemRequestService.findAllUserItemsRequests(user.getId(), 0, 10);
+        verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(anyLong(), any());
     }
 
     @Test
     void findAllUserItemRequestsUserNotFoundTest() {
-        assertThrows(NotFoundException.class, () -> itemRequestService.findAllUserItemsRequests(42L));
+        assertThrows(NotFoundException.class, () -> itemRequestService.findAllUserItemsRequests(42L, 0, 10));
     }
 
     @Test

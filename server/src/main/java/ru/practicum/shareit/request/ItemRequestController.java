@@ -36,9 +36,11 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    List<ItemRequestDto> findAllUserItemsRequests(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    List<ItemRequestDto> findAllUserItemsRequests(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                  @RequestParam(name = "from", defaultValue = "0") int from,
+                                                  @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Find all requests for user with id=" + userId);
-        return itemRequestService.findAllUserItemsRequests(userId);
+        return itemRequestService.findAllUserItemsRequests(userId, from, size);
     }
 
 

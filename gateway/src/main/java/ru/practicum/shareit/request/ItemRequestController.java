@@ -36,9 +36,11 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    ResponseEntity<Object> findAllUserItemsRequests(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    ResponseEntity<Object> findAllUserItemsRequests(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                    @RequestParam(name = "from", defaultValue = "0") int from,
+                                                    @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Find all requests for user with id=" + userId);
-        return itemRequestClient.findAllUserItemsRequests(userId);
+        return itemRequestClient.findAllUserItemsRequests(userId, from, size);
     }
 
 

@@ -48,20 +48,16 @@ public class BookingController {
 	@RequestParam(name = "state", defaultValue = "ALL") BookingState state,
 	@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 	@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-//		BookingState state = BookingState.from(stateParam)
-//				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
 		log.info("Get booking with state {}, userId={}, from={}, size={}", state, userId, from, size);
 		return bookingClient.findBookingByOwner(userId, state, from, size);
 	}
 
 	@GetMapping
 	public ResponseEntity<Object> findBookingByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-													@RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+													@RequestParam(name = "state", defaultValue = "ALL") BookingState state,
 													@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 													@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-		BookingState state = BookingState.from(stateParam)
-				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-		log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
+		log.info("Get booking with state {}, userId={}, from={}, size={}", state, userId, from, size);
 		return bookingClient.findBookingByUser(userId, state, from, size);
 	}
 

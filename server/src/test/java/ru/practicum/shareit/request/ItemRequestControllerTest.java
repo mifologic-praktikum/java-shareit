@@ -76,7 +76,7 @@ public class ItemRequestControllerTest {
 
     @Test
     void findAllUserItemsRequestsTest() throws Exception {
-        when(itemRequestService.findAllUserItemsRequests(anyLong()))
+        when(itemRequestService.findAllUserItemsRequests(anyLong(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(itemRequestDto));
 
         mvc.perform(get("/requests")
@@ -84,7 +84,7 @@ public class ItemRequestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         verify(itemRequestService, times(1))
-                .findAllUserItemsRequests(1L);
+                .findAllUserItemsRequests(1L, 0, 10);
     }
 
     @Test
