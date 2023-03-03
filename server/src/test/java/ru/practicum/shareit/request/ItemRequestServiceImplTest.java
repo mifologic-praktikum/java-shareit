@@ -2,7 +2,6 @@ package ru.practicum.shareit.request;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -121,14 +120,5 @@ public class ItemRequestServiceImplTest {
     void findAllItemsRequestsUserNotFoundTest() {
         assertThrows(NotFoundException.class, () -> itemRequestService.findAllItemsRequests(42L, 0, 10));
     }
-
-    @Test
-    void findAllItemsRequestsNegativeTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.of(user));
-        assertThrows(BadRequestException.class, () -> itemRequestService.findAllItemsRequests(user.getId(), -2, 10));
-    }
-
-
 }
 

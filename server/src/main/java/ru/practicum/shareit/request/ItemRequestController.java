@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -37,8 +39,8 @@ public class ItemRequestController {
 
     @GetMapping
     List<ItemRequestDto> findAllUserItemsRequests(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                  @RequestParam(name = "from", defaultValue = "0") int from,
-                                                  @RequestParam(name = "size", defaultValue = "10") int size) {
+                                                  @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+                                                  @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Find all requests for user with id=" + userId);
         return itemRequestService.findAllUserItemsRequests(userId, from, size);
     }
@@ -47,8 +49,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     List<ItemRequestDto> findAllItemsRequests(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Find all requests");
         return itemRequestService.findAllItemsRequests(userId, from, size);
     }
