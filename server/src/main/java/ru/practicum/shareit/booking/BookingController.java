@@ -43,11 +43,9 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> findBookingByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
                                               @RequestParam(value = "state", defaultValue = "ALL")
-                                              String stateParam,
+                                              BookingState state,
                                               @RequestParam(name = "from", defaultValue = "0") int from,
                                               @RequestParam(name = "size", defaultValue = "10") int size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         log.info("Find bookings by state=" + state);
         return bookingService.findBookingsByUser(userId, state, from, size);
     }
@@ -55,11 +53,9 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> findBookingsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                 @RequestParam(
-                                                        value = "state", defaultValue = "ALL", required = false) String stateParam,
+                                                        value = "state", defaultValue = "ALL", required = false) BookingState state,
                                                 @RequestParam(name = "from", defaultValue = "0") int from,
                                                 @RequestParam(name = "size", defaultValue = "10") int size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         log.info("Find owner's booking by state=" + state);
         return bookingService.findBookingsByOwner(userId, state, from, size);
     }
