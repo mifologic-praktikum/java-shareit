@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UserHasNoBookings;
 import ru.practicum.shareit.exception.ValidationException;
@@ -53,9 +52,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> findAllItems(Long userId, int from, int size) {
         List<ItemDto> userItems = new ArrayList<>();
-        if (from < 0) {
-            throw new BadRequestException("Can't be negative");
-        }
         Pageable pageable = PageRequest.of((from / size), size, Sort.by(Sort.Direction.ASC, "id"));
         Page<Item> itemList = itemRepository.findAll(pageable);
         for (Item item : itemList) {
@@ -85,9 +81,6 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> searchItems(String text, int from, int size) {
         if (text.isBlank()) {
             return Collections.emptyList();
-        }
-        if (from < 0) {
-            throw new BadRequestException("Can't be negative");
         }
         Pageable pageable = PageRequest.of((from / size), size);
         return ItemMapper.toListItemDto(itemRepository.findAll(pageable).stream()

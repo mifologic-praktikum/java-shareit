@@ -4,10 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UserHasNoBookings;
 import ru.practicum.shareit.exception.ValidationException;
@@ -73,10 +73,10 @@ ItemServiceImplTest {
     @Test
     void findAllItemsTest() {
         final PageImpl<Item> itemPage = new PageImpl<>(Collections.singletonList(item));
-        when(itemRepository.findAll(PageRequest.of((0 / 10), 10)))
+        when(itemRepository.findAll(PageRequest.of((0 / 10), 10, Sort.by(Sort.Direction.ASC, "id"))))
                 .thenReturn(itemPage);
         assertNotNull(itemService.findAllItems(1L, 0, 10));
-        verify(itemRepository, times(1)).findAll(PageRequest.of((0 / 10), 10));
+        verify(itemRepository, times(1)).findAll(PageRequest.of((0 / 10), 10, Sort.by(Sort.Direction.ASC, "id")));
     }
 
     @Test
@@ -195,15 +195,6 @@ ItemServiceImplTest {
         assertThrows(NotFoundException.class, () -> itemService.findItemById(1L, 42L));
     }
 
-    @Test
-    void findAllItemsBadRequest() {
-        assertThrows(BadRequestException.class, () -> itemService.findAllItems(1L, -1, 10));
-    }
-
-    @Test
-    void searchItemsBadRequestTest() {
-        assertThrows(BadRequestException.class, () -> itemService.searchItems("газовая горелка", -2, 10));
-    }
 
     @Test
     void updateItemDescriptionTest() {
