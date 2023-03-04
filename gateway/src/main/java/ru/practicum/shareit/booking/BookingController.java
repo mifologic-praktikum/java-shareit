@@ -65,11 +65,11 @@ public class BookingController {
 	}
 
 	private void checkBookingDates(BookItemRequestDto requestDto) {
-		if (requestDto.getEnd().isBefore(requestDto.getStart())) {
-			throw new BadRequestException("End date can't be before start date");
-		}
 		if (requestDto.getStart().isBefore(LocalDateTime.now())) {
 			throw new BadRequestException("Start date can't be before in the past");
+		}
+		if (requestDto.getEnd().isBefore(requestDto.getStart())) {
+			throw new BadRequestException("End date can't be before start date");
 		}
 	}
 
