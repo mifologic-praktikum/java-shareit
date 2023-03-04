@@ -20,7 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -102,27 +103,6 @@ public class BookingServiceImplTest {
                 bookigService.createBooking(1L, newBookingDto));
     }
 
-    @Test
-    void createBookingGetEndIsBeforeTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.of(user));
-        when(itemRepository.findById(anyLong()))
-                .thenReturn(Optional.of(item));
-        newBookingDto.setEnd(LocalDateTime.of(2023, 12, 10, 13, 48, 48));
-        assertThrows(BadRequestException.class, () ->
-                bookigService.createBooking(user.getId(), newBookingDto));
-    }
-
-    @Test
-    void createBookingGetStartIsBeforeTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.of(user));
-        when(itemRepository.findById(anyLong()))
-                .thenReturn(Optional.of(item));
-        newBookingDto.setStart(LocalDateTime.of(2022, 12, 10, 13, 48, 48));
-        assertThrows(BadRequestException.class, () ->
-                bookigService.createBooking(2L, newBookingDto));
-    }
 
     @Test
     void createBookingUserNotFoundTest() {

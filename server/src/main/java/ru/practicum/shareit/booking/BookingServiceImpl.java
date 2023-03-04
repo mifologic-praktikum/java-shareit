@@ -52,12 +52,6 @@ public class BookingServiceImpl implements BookigService {
             throw new BadRequestException("This item is unavailable for booking");
         }
         Booking booking = BookingMapper.toBooking(newBookingDto, item, user);
-        if (booking.getEnd().isBefore(booking.getStart())) {
-            throw new BadRequestException("End date can't be before start date");
-        }
-        if (booking.getStart().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Start date can't be before in the past");
-        }
         booking.setBooker(user);
         booking.setItem(item);
         booking.setStatus(BookingStatus.WAITING);

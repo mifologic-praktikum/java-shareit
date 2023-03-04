@@ -1,10 +1,8 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.*;
-import ru.practicum.shareit.Create;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,9 +13,7 @@ import java.time.LocalDateTime;
 public class BookingDto {
 
     private Long id;
-    @NotBlank(groups = {Create.class})
     private LocalDateTime start;
-    @NotBlank(groups = {Create.class})
     private LocalDateTime end;
     private Item item;
     private User booker;

@@ -30,15 +30,6 @@ public class ItemRequestDto {
         private String name;
         private String description;
         private Boolean available;
-        private  Long requestId;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @ToString
-    public static class User {
-        Long id;
+        private Long requestId;
     }
 }

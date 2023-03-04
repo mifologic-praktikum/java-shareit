@@ -9,10 +9,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exception.BadRequestException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -25,6 +27,7 @@ public class BookingController {
 	@PostMapping
 	public ResponseEntity<Object> createBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
 			@RequestBody @Valid BookItemRequestDto requestDto) {
+		checkBookingDates(requestDto);
 		log.info("Creating booking {}, userId={}", requestDto, userId);
 		return bookingClient.createBooking(userId, requestDto);
 	}
@@ -61,5 +64,13 @@ public class BookingController {
 		return bookingClient.findBookingByUser(userId, state, from, size);
 	}
 
+	private void checkBookingDates(BookItemRequestDto requestDto) {
+		if (requestDto.getEnd().isBefore(requestDto.getStart())) {
+			throw new BadRequestException("End date can't be before start date");
+		}
+		if (requestDto.getStart().isBefore(LocalDateTime.now())) {
+			throw new BadRequestException("Start date can't be before in the past");
+		}
+	}
 
 }
