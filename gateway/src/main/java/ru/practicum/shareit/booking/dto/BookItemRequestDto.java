@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.dto;
 
 import java.time.LocalDateTime;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 
@@ -18,4 +19,9 @@ public class BookItemRequestDto {
 	private LocalDateTime start;
 	@Future
 	private LocalDateTime end;
+
+	@AssertTrue(message = "Field `end` should be later than `start`")
+	private boolean isStarIsBeforeEnd() {
+		return start.isBefore(end);
+	}
 }
